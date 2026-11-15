@@ -1,0 +1,3086 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hopecore Tracker</title>
+<meta name="description" content="Hope grounded in evidence: a sourced tracker of AI-driven progress from today to 2040.">
+<style>
+:root{
+  --bg:#faf8f4;--surface:#ffffff;--surface-2:#f2efe8;--text:#1d1c1a;--muted:#65625c;--border:#e2ded5;--accent:#2f6f5e;
+  --s-confirmed:#1f7a4d;--s-early:#1f7a4d;--s-on-track:#2a62b8;--s-pending:#6b6f76;--s-slipping:#a86400;--s-missed:#b3261e;--s-superseded:#8d8f93;
+  --sev-high:#b3261e;--sev-medium:#a86400;--sev-low:#6b6f76;
+  --chart:#2f6f5e;--grid:#e6e2d9;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141412;--surface:#1d1d1a;--surface-2:#262622;--text:#ecebe6;--muted:#a3a097;--border:#34332e;--accent:#6cc3a8;
+  --s-confirmed:#4cc38a;--s-early:#4cc38a;--s-on-track:#6ea4f0;--s-pending:#9a9ea5;--s-slipping:#e0a040;--s-missed:#f07167;--s-superseded:#7c7e82;
+  --sev-high:#f07167;--sev-medium:#e0a040;--sev-low:#9a9ea5;--chart:#6cc3a8;--grid:#2e2d29;
+}}
+:root[data-theme="dark"]{
+  --bg:#141412;--surface:#1d1d1a;--surface-2:#262622;--text:#ecebe6;--muted:#a3a097;--border:#34332e;--accent:#6cc3a8;
+  --s-confirmed:#4cc38a;--s-early:#4cc38a;--s-on-track:#6ea4f0;--s-pending:#9a9ea5;--s-slipping:#e0a040;--s-missed:#f07167;--s-superseded:#7c7e82;
+  --sev-high:#f07167;--sev-medium:#e0a040;--sev-low:#9a9ea5;--chart:#6cc3a8;--grid:#2e2d29;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 ui-serif,Georgia,"Iowan Old Style",serif}
+.sans,h1,h2,h3,.chip,.tile,.meta,button,select,.kicker,table{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.num{font-variant-numeric:tabular-nums}
+a{color:var(--accent)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header.hero{padding:48px 0 24px;border-bottom:1px solid var(--border)}
+.kicker{text-transform:uppercase;letter-spacing:.12em;font-size:12px;color:var(--muted);font-weight:600}
+h1{font-size:clamp(28px,5vw,46px);line-height:1.1;margin:8px 0 12px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:22px;margin:0 0 4px}
+h3{font-size:16px;margin:0 0 8px}
+.lede{font-size:clamp(17px,2.2vw,20px);max-width:820px;margin:0}
+.meta{color:var(--muted);font-size:13px;margin-top:12px}
+section{padding:36px 0;border-bottom:1px solid var(--border)}
+.sec-sub{color:var(--muted);margin:0 0 18px;font-size:15px}
+sup.src{font-size:10px;font-family:ui-sans-serif,system-ui,sans-serif;margin-left:1px}
+sup.src a{text-decoration:none;padding:0 1px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.tile .v{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile .l{font-size:12px;color:var(--muted);margin-top:4px}
+.tile[data-s] .v{color:var(--sc)}
+.charts{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.chart-card .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.chart-card .big{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;font-family:ui-sans-serif,system-ui,sans-serif}
+.chart-card .delta{font-size:12px;color:var(--muted);font-family:ui-sans-serif,system-ui,sans-serif}
+.chart-card .name{font-size:14px;font-weight:600;font-family:ui-sans-serif,system-ui,sans-serif;margin:0 0 4px}
+.chart-card svg{width:100%;height:auto;display:block;margin:6px 0}
+.chart-card .note{font-size:13px;color:var(--muted)}
+.dom-tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:ui-sans-serif,system-ui,sans-serif}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--sc);color:var(--sc);background:color-mix(in srgb,var(--sc) 10%,transparent);white-space:nowrap}
+[data-s="confirmed"]{--sc:var(--s-confirmed)}[data-s="early"]{--sc:var(--s-early)}[data-s="on-track"]{--sc:var(--s-on-track)}[data-s="pending"]{--sc:var(--s-pending)}[data-s="slipping"]{--sc:var(--s-slipping)}[data-s="missed"]{--sc:var(--s-missed)}[data-s="superseded"]{--sc:var(--s-superseded)}
+.pred.superseded .ptext{text-decoration:line-through;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.filters button{font-size:13px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:5px 11px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.timeline{display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x proximity}
+.year{flex:0 0 230px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;scroll-snap-align:start}
+.year h3{font-size:20px;font-variant-numeric:tabular-nums;display:flex;justify-content:space-between;align-items:baseline}
+.year h3 small{font-size:12px;color:var(--muted);font-weight:500}
+.year.now{border-color:var(--accent)}
+details.pred{border-top:1px solid var(--border);padding:8px 0}
+details.pred:first-of-type{border-top:0}
+details.pred summary{cursor:pointer;list-style:none}
+details.pred summary::-webkit-details-marker{display:none}
+details.pred summary .ptext{display:block;font-size:14px;margin-top:4px;line-height:1.4}
+details.pred summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.phist{font-size:13px;color:var(--muted);margin:8px 0 0;padding-left:16px}
+.phist li{margin-bottom:4px}
+.conf{font-size:11px;color:var(--muted);font-family:ui-sans-serif,system-ui,sans-serif;margin-left:4px}
+.domains{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.domain h2{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.domain .counts{display:flex;gap:4px;flex-wrap:wrap}
+.domain h3{margin-top:16px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.ms{margin:0;padding:0;list-style:none}
+.ms li{padding:8px 0;border-top:1px solid var(--border)}
+.ms li:first-child{border-top:0}
+.ms .d{font-size:12px;color:var(--muted);font-family:ui-sans-serif,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.ms .t{font-weight:600;font-size:15px}
+.ms .s{font-size:14px;margin:2px 0 0}
+.badge{font-size:10.5px;font-family:ui-sans-serif,system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em;border:1px solid var(--border);border-radius:4px;padding:0 5px;color:var(--muted);margin-left:4px;white-space:nowrap}
+.badge.first{border-color:var(--s-confirmed);color:var(--s-confirmed)}
+.roadblocks{background:var(--surface-2);border-radius:10px;padding:10px 12px;margin-top:6px}
+.rb{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:8px 0;border-top:1px solid var(--border)}
+.rb:first-of-type{border-top:0}
+.rb .sev{font-size:11px;font-weight:700;font-family:ui-sans-serif,system-ui,sans-serif;text-transform:uppercase;color:var(--sv);white-space:nowrap}
+.rb .rt{font-weight:600;font-size:14px}
+.rb .rs{grid-column:2;font-size:13px;color:var(--muted)}
+.rb .tr{font-size:12px;font-family:ui-sans-serif,system-ui,sans-serif;color:var(--muted);white-space:nowrap}
+[data-sev="high"]{--sv:var(--sev-high)}[data-sev="medium"]{--sv:var(--sev-medium)}[data-sev="low"]{--sv:var(--sev-low)}
+.read{font-size:15px;margin:6px 0 0}
+details.more>summary{cursor:pointer;font-size:13px;color:var(--accent);font-family:ui-sans-serif,system-ui,sans-serif;padding:6px 0}
+.proved{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.proved .card{border:1px solid var(--s-confirmed);background:linear-gradient(160deg,color-mix(in srgb,var(--s-confirmed) 12%,var(--surface)),var(--surface) 60%)}
+.proved .yrs{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:700;color:var(--s-confirmed);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.proved .pt{font-size:18px;font-weight:600;margin:6px 0}
+.reality{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.empty{color:var(--muted);font-style:italic}
+.changelog details{border-top:1px solid var(--border);padding:10px 0}
+.changelog summary{cursor:pointer;font-family:ui-sans-serif,system-ui,sans-serif;font-weight:600}
+.changelog ul{font-size:14px;color:var(--muted)}
+footer{padding:36px 0 60px;font-size:14px}
+footer ol{padding-left:22px;font-size:13px;color:var(--muted)}
+footer ol li{margin-bottom:4px;word-break:break-word}
+footer ol li:target{background:color-mix(in srgb,var(--accent) 18%,transparent);border-radius:4px}
+.disclaimer{background:var(--surface-2);border-radius:10px;padding:12px 14px;margin:14px 0}
+.domains>*,.reality>*,.charts>*,.proved>*,.tiles>*{min-width:0}
+section,header.hero,footer{min-width:0;max-width:100%}
+.fade{animation:fadein .8s ease-out both}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}}
+@media (max-width:720px){
+  .domains,.reality,.charts,.proved{grid-template-columns:minmax(0,1fr)}
+  header.hero{padding-top:28px}
+  .year{flex-basis:78vw}
+}
+</style>
+</head>
+<body>
+<div id="app" class="wrap"><noscript><p>This dashboard renders from embedded data and needs JavaScript.</p></noscript></div>
+
+<script type="application/json" id="hopecore-data">
+{
+ "meta": {
+  "version": 1,
+  "created": "2026-11-14",
+  "last_run": "2026-11-14",
+  "run_count": 1,
+  "summary": "AI is now measurably speeding up its own development (METR: about 1.9x at one lab), robotaxis are beating human injury-crash rates in independent data, and the first psilocybin drug application is complete, but memory shortages, grid queues and a weak entry-level job market are real headwinds.",
+  "summary_source_ids": [
+   "src-metr-anth",
+   "src-iihs-claims",
+   "src-compass-pr",
+   "src-trendforce-q1",
+   "src-carbondirect",
+   "src-stanford-canaries"
+  ]
+ },
+ "domains": [
+  {
+   "id": "ai",
+   "name": "AI capabilities & self-improvement",
+   "read": "Real: independent evaluators now see AI accelerating AI research. METR's high-access review put one lab's capability trend at about 1.9x its old pace, mostly from researchers using AI tools rather than AI working alone. Hype: the measuring sticks are breaking. METR's own time-horizon suite is unreliable above about 16 hours and several benchmarks are saturated, so headline numbers are increasingly lower bounds or company-redacted. Watch: whether METR or Epoch publish a successor long-task measure, and whether a second lab gets an independent R&D-speedup assessment."
+  },
+  {
+   "id": "computing",
+   "name": "Computing & hardware",
+   "read": "Real: gigawatt-scale AI campuses are being built in about two years, and quantum error correction keeps improving (Quantinuum reports record-low logical error rates, still in preprint). Hype: 'first 1 GW data center' claims conflict and most rest on company timelines rather than measured load. The bad news is concrete: DRAM contract prices roughly doubled in Q1 2026, PC makers are raising prices again, and analysts see no relief before late 2027. Watch: TrendForce's Q1 2027 contract prices and new fab capacity dates."
+  },
+  {
+   "id": "software",
+   "name": "Software & open source",
+   "read": "Real: AI writes a large and growing share of code. Anthropic reports more than 80% of its merged code is written by Claude, and GitHub's Octoverse data (via a secondary summary) shows detectable agents opening more than 40% of pull requests in September 2026. Mixed: broad developer surveys land between about 30% (DX, merged code) and 47% (JetBrains, self-reported), and most developers still don't fully trust AI code. Watch: a credible, platform-wide measurement of AI-authored merged code."
+  },
+  {
+   "id": "robotics",
+   "name": "Robotics",
+   "read": "Real: humanoid shipments are growing fast (Counterpoint, via secondary coverage, counted over 22,000 in H1 2026, mostly Chinese vendors), and Figure and Agility have documented paid factory and warehouse work. Hype: shipped is not deployed. Analysts estimate only a few thousand humanoids do repeated paid work, and home robots like 1X NEO are preorders, with teleoperation still part of the pitch. Watch: verified delivery counts for NEO and independent deployment tallies."
+  },
+  {
+   "id": "cars",
+   "name": "Cars & transport",
+   "read": "Real: this is the most mature domain. Waymo runs paid driverless rides in about 14 U.S. cities with roughly 4,000 vehicles, Baidu's Apollo Go reports 26 to 28 cities, and an independent IIHS study found 81% fewer injury crashes per mile than human drivers. Driverless trucks have hauled commercial freight in Texas since May 2025. Mixed: safety gains vary a lot by city (San Francisco 35% lower, Austin not better in a small sample), and Aurora trimmed its fleet early in 2026. Watch: Waymo's 1 million weekly rides goal and BNEF's December battery survey."
+  },
+  {
+   "id": "medicine",
+   "name": "Medicine & drug discovery",
+   "read": "Real: the first true tests of AI-era drug discovery are here. Takeda's computationally designed zasocitinib has an FDA decision due in Q1 2027, and Insilico's generative-AI drug rentosertib began a 52-week Phase III in September. Personalized mRNA cancer vaccines had their first positive Phase 3 result. Not yet: zero AI-discovered drugs are approved, Phase 2 failure rates look similar to traditional drugs, and 'AI-discovered' has no regulatory definition. Watch: the zasocitinib FDA decision and full INTerpath-001 data."
+  },
+  {
+   "id": "mental-health",
+   "name": "Mental health",
+   "read": "Real: Compass Pathways completed the first-ever new drug application for psilocybin (COMP360, treatment-resistant depression), backed by two Phase 3 trials. Randomized trials of AI therapy chatbots (Therabot, Kai) show modest benefits. Not yet: COMP360 is not approved and still needs FDA acceptance, approval and DEA rescheduling. No generative-AI therapy app has FDA clearance, and the Kai trial's lead author works for the company. Watch: FDA filing acceptance for COMP360. This dashboard is not medical advice."
+  },
+  {
+   "id": "healthcare",
+   "name": "Healthcare delivery",
+   "read": "Real: AI scribes spread quickly inside big health systems (about 70% of UCSF physicians; Kaiser offers them to 25,000+ clinicians). A U.S. law now creates a path for Medicare to cover multi-cancer blood tests, and an FDA panel voted 7-2 that Galleri's benefits outweigh its risks. Mixed: time savings from scribes are modest in studies, there is no reliable national adoption figure, and the NHS-Galleri trial missed its primary endpoint. Watch: the FDA's final Galleri decision."
+  },
+  {
+   "id": "energy",
+   "name": "Energy",
+   "read": "Real: private fusion hit new records. Helion reports 150 million °C and measurable deuterium-tritium fusion in its Polaris prototype (company-reported), and CFS is installing SPARC's magnets. Battery storage packs keep getting cheaper. Hype: no private fusion machine has shown net energy, and SPARC's first plasma now looks like 2027. The headwind: data center grid connections take 3 to 7+ years in hot markets, and queues keep growing. Watch: SPARC first plasma and ERCOT/PJM queue reforms."
+  },
+  {
+   "id": "society",
+   "name": "Economy & society",
+   "read": "Real: U.S. productivity grew 3.6% (annualized) in Q3 2026 and about 2.1% a year since late 2019, above the 2007–2019 pace. Measured job effects so far are concentrated among young workers in AI-exposed jobs (a 19% employment gap for ages 22–25 in Stanford's ADP-based study), mostly through slower hiring rather than layoffs. Contested: the BLS can't isolate AI's share of productivity, the Fed studies weigh weak hiring more heavily than AI, and labor's share of income hit a record low. No national AI-linked income-support program exists. Watch: the December productivity revision."
+  }
+ ],
+ "metrics": [
+  {
+   "id": "metr-th-50",
+   "domain": "ai",
+   "name": "METR 50% time horizon (frontier)",
+   "unit": "hours",
+   "log": true,
+   "series": [
+    {
+     "date": "2025-08",
+     "value": 2.3,
+     "source_ids": [
+      "src-metr-th"
+     ],
+     "note": "GPT-5, about 2h17m (METR)"
+    },
+    {
+     "date": "2025-11",
+     "value": 4.8,
+     "source_ids": [
+      "src-metr-th"
+     ],
+     "note": "Claude Opus 4.5, about 4h49m (METR)"
+    },
+    {
+     "date": "2026-11",
+     "value": 16,
+     "source_ids": [
+      "src-metr-th",
+      "src-epoch-th"
+     ],
+     "note": "Lower bound from the seed brief; METR says measurements above about 16h are unreliable. Not re-verified against a live METR page this run."
+    }
+   ],
+   "trend_note": "Doubling about every 131 days on the post-2023 fit (METR TH1.1); suite is saturating."
+  },
+  {
+   "id": "ai-rd-speedup",
+   "domain": "ai",
+   "name": "AI R&D acceleration (independently measured)",
+   "unit": "x",
+   "series": [
+    {
+     "date": "2026-11-05",
+     "value": 1.9,
+     "source_ids": [
+      "src-metr-anth"
+     ],
+     "note": "Anthropic capability-trend acceleration since Oct 2025; 95% CI 1.5–2.8x; roughly 80% attributed to AI use"
+    }
+   ],
+   "trend_note": "First independent estimate. One lab only, partly redacted."
+  },
+  {
+   "id": "gh-agent-prs",
+   "domain": "software",
+   "name": "GitHub pull requests started by detectable agents",
+   "unit": "%",
+   "series": [
+    {
+     "date": "2026-03",
+     "value": 17,
+     "source_ids": [
+      "src-octoverse-summary"
+     ],
+     "note": "Secondary summary of Octoverse 2026"
+    },
+    {
+     "date": "2026-09",
+     "value": 40,
+     "source_ids": [
+      "src-octoverse-summary"
+     ],
+     "note": "'More than 40%'; only counts agents GitHub can detect"
+    }
+   ],
+   "trend_note": "More than doubled in six months (secondary source)."
+  },
+  {
+   "id": "dram-index",
+   "domain": "computing",
+   "name": "Conventional DRAM contract price index (Q4 2025 = 100)",
+   "unit": "index",
+   "series": [
+    {
+     "date": "2025-12",
+     "value": 100,
+     "source_ids": [
+      "src-trendforce-q1"
+     ],
+     "note": "Baseline"
+    },
+    {
+     "date": "2026-03",
+     "value": 190,
+     "source_ids": [
+      "src-trendforce-q1"
+     ],
+     "note": "Q1 2026: +90–95% QoQ; lower bound used"
+    },
+    {
+     "date": "2026-06",
+     "value": 300,
+     "source_ids": [
+      "src-trendforce-2q"
+     ],
+     "note": "Q2 2026: TrendForce projected +58–63% QoQ; lower bound used; a forecast, not a settled price"
+    }
+   ],
+   "trend_note": "Roughly tripled in two quarters; server DRAM still rising +13–18% QoQ in Q3."
+  },
+  {
+   "id": "humanoid-shipments",
+   "domain": "robotics",
+   "name": "Humanoid robot shipments (worldwide, per period)",
+   "unit": "units",
+   "series": [
+    {
+     "date": "2025-12",
+     "value": 13000,
+     "source_ids": [
+      "src-humanoid-ai2work"
+     ],
+     "note": "Full-year 2025 (Omdia, via secondary)"
+    },
+    {
+     "date": "2026-06",
+     "value": 22000,
+     "source_ids": [
+      "src-humanoid-techrepublic"
+     ],
+     "note": "H1 2026 only (Counterpoint, via secondary). Productive deployments are estimated far lower, about 3,000–4,000."
+    }
+   ],
+   "trend_note": "Half a year of 2026 already exceeds all of 2025. Shipped is not deployed."
+  },
+  {
+   "id": "waymo-cities",
+   "domain": "cars",
+   "name": "Waymo U.S. cities with paid driverless rides",
+   "unit": "cities",
+   "series": [
+    {
+     "date": "2026-03",
+     "value": 10,
+     "source_ids": [
+      "src-waymo-sherwood"
+     ],
+     "note": "500k paid rides/week across 10 cities"
+    },
+    {
+     "date": "2026-09-22",
+     "value": 14,
+     "source_ids": [
+      "src-waymo-dtc"
+     ],
+     "note": "After Denver, San Diego and Tampa. Some outlets say 15; conservative figure used."
+    }
+   ],
+   "trend_note": "Four new cities in six months. Apollo Go separately reports 26–28 cities worldwide."
+  },
+  {
+   "id": "waymo-fleet",
+   "domain": "cars",
+   "name": "Waymo robotaxi fleet",
+   "unit": "vehicles",
+   "series": [
+    {
+     "date": "2026-07",
+     "value": 3500,
+     "source_ids": [
+      "src-waymo-dealroom"
+     ],
+     "note": "Approximate"
+    },
+    {
+     "date": "2026-09",
+     "value": 4000,
+     "source_ids": [
+      "src-waymo-dealroom"
+     ],
+     "note": "'Exceeds 4,000', including about 300 Zeekr-based Ojai vans"
+    }
+   ],
+   "trend_note": "About +14% in two months."
+  },
+  {
+   "id": "battery-pack",
+   "domain": "cars",
+   "name": "Li-ion battery pack price (global avg, BNEF)",
+   "unit": "$/kWh",
+   "series": [
+    {
+     "date": "2024-12",
+     "value": 115,
+     "source_ids": [
+      "src-bnef-2025"
+     ],
+     "note": "2024 survey"
+    },
+    {
+     "date": "2025-12-09",
+     "value": 108,
+     "source_ids": [
+      "src-bnef-2025"
+     ],
+     "note": "Record low; China $84, stationary $70"
+    }
+   ],
+   "trend_note": "BNEF forecasts just under $105 for 2026; next survey due December 2026."
+  },
+  {
+   "id": "ai-drugs-clinic",
+   "domain": "medicine",
+   "name": "AI-discovered drug programs in human trials",
+   "unit": "programs",
+   "series": [
+    {
+     "date": "2023-12",
+     "value": 24,
+     "source_ids": [
+      "src-intuition-aidrugs"
+     ],
+     "note": "'Roughly two dozen' (secondary)"
+    },
+    {
+     "date": "2026-06",
+     "value": 117,
+     "source_ids": [
+      "src-intuition-aidrugs"
+     ],
+     "note": "Conservative ASCO 2026 abstract count (63 companies). Other trackers say 173+ or 200+; definitions differ."
+    }
+   ],
+   "trend_note": "About 5x in 2.5 years; zero approvals so far."
+  },
+  {
+   "id": "us-productivity",
+   "domain": "society",
+   "name": "U.S. nonfarm productivity growth (annualized, quarterly)",
+   "unit": "%",
+   "series": [
+    {
+     "date": "2026-09",
+     "value": 3.6,
+     "source_ids": [
+      "src-axios-prod",
+      "src-advisor-prod"
+     ],
+     "note": "Q3 2026 preliminary (BLS, Nov 5); revision due Dec 8"
+    }
+   ],
+   "trend_note": "About 2.1%/yr since Q4 2019 vs 1.5% in 2007–2019. AI's share not isolated."
+  },
+  {
+   "id": "youth-ai-gap",
+   "domain": "society",
+   "name": "Employment gap, ages 22–25 in high-AI-exposure jobs",
+   "unit": "%",
+   "series": [
+    {
+     "date": "2025-07",
+     "value": 15,
+     "source_ids": [
+      "src-stanford-canaries"
+     ],
+     "note": "Below level expected from less-exposed jobs"
+    },
+    {
+     "date": "2026-06",
+     "value": 19,
+     "source_ids": [
+      "src-stanford-canaries"
+     ],
+     "note": "ADP payroll data through June 2026; causation not established"
+    }
+   ],
+   "trend_note": "Widening. Mostly slower hiring, not layoffs."
+  }
+ ],
+ "predictions": [
+  {
+   "id": "pred-ai-2027-rd3x",
+   "domain": "ai",
+   "year": 2027,
+   "text": "AI R&D speedup at a frontier lab independently measured at ≥3x",
+   "kind": "capability",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. First independent measurement (METR, Nov 2026) is about 1.9x with an upper CI of 2.8x; trend direction is right but 3x is not yet measured.",
+     "source_ids": [
+      "src-metr-anth"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-ai-2027-weeklong",
+   "domain": "ai",
+   "year": 2027,
+   "text": "AI systems complete week-long research projects autonomously (independently verified)",
+   "kind": "capability",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. METR's Nov 2026 review found models could not yet fully replace human researchers.",
+     "source_ids": [
+      "src-metr-anth"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-ai-2028-month",
+   "domain": "ai",
+   "year": 2028,
+   "text": "Frontier time horizon (50%) exceeds 1 work-month (~170 hours) on a successor METR-style measure",
+   "kind": "capability",
+   "origin": "seed",
+   "status": "on-track",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "on-track",
+     "reason": "Measured horizons went from about 2.3h (Aug 2025) to ≥16h (late 2026). At a 131-day doubling, 170h arrives around early 2028. Risk: no successor measure exists yet.",
+     "source_ids": [
+      "src-metr-th"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-ai-2030-year",
+   "domain": "ai",
+   "year": 2030,
+   "text": "Frontier time horizon exceeds 1 work-year (~2,000 hours), or METR-style measurement is retired as saturated",
+   "kind": "capability",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Current suite already unreliable above about 16h.",
+     "source_ids": [
+      "src-metr-th"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-ai-2032-99pct",
+   "domain": "ai",
+   "year": 2032,
+   "text": "≥99% of AI R&D tasks automated (METR simpler-model median)",
+   "kind": "capability",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-computing-2027-dram",
+   "domain": "computing",
+   "year": 2027,
+   "text": "New memory capacity comes online and DRAM contract prices begin falling year over year",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "slipping",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "slipping",
+     "reason": "TrendForce expects server DRAM prices to keep rising each quarter through 2H27; Nikkei reports 2027 supply meets only about 60% of demand; IDC sees shortages well into 2027.",
+     "source_ids": [
+      "src-trendforce-3q",
+      "src-techwire-2027",
+      "src-techspot-idc"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-computing-2028-pc",
+   "domain": "computing",
+   "year": 2028,
+   "text": "Consumer PC prices return to or fall below 2025 levels in real terms",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "slipping",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "slipping",
+     "reason": "Industry now expects 2026 PC price increases of 20–40%, with Acer guiding another 5–20% in Q4 2026; memory relief not expected before late 2027.",
+     "source_ids": [
+      "src-pcworld-msi",
+      "src-techinsider-acer"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-computing-2028-aichip",
+   "domain": "computing",
+   "year": 2028,
+   "text": "A production chip substantially designed by AI agents ships in volume",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Not researched in depth this run.",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-computing-2029-optical",
+   "domain": "computing",
+   "year": 2029,
+   "text": "Optical interconnects become standard in frontier AI clusters",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Not researched in depth this run.",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-computing-2030-10gw",
+   "domain": "computing",
+   "year": 2030,
+   "text": "A single AI cluster reaches 10 GW",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Epoch AI expects several 1 GW+ sites in 2026; gigawatt builds take about two years. Grid queues are the constraint.",
+     "source_ids": [
+      "src-epoch-gw",
+      "src-carbondirect"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-computing-2030-500pc",
+   "domain": "computing",
+   "year": 2030,
+   "text": "A 2026 top-tier gaming PC's performance costs under $500 (2026 dollars)",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Near-term GPU and RAM prices are rising, which works against this.",
+     "source_ids": [
+      "src-pcworld-msi"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-computing-2035-quantum",
+   "domain": "computing",
+   "year": 2035,
+   "text": "Error-corrected quantum computer solves a commercially useful chemistry problem",
+   "kind": "capability",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Logical error rates improving (Quantinuum preprint) but nothing commercially useful yet.",
+     "source_ids": [
+      "src-quantinuum-postq"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-software-2028-github",
+   "domain": "software",
+   "year": 2028,
+   "text": "Majority of new code on GitHub written by AI agents (credible measurement)",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "on-track",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "on-track",
+     "reason": "Detectable agents started more than 40% of GitHub PRs in Sept 2026, up from 17% in March (secondary summary of Octoverse); developers self-report 42–47% AI-generated code. PRs started is not lines of code merged.",
+     "source_ids": [
+      "src-octoverse-summary",
+      "src-jetbrains",
+      "src-sonar"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-software-2028-oss",
+   "domain": "software",
+   "year": 2028,
+   "text": "Organized agent programs maintain or revive abandoned high-use open-source packages at scale",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Not researched in depth this run.",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-software-2029-formal",
+   "domain": "software",
+   "year": 2029,
+   "text": "Formal verification used routinely in at least one mainstream critical-software domain thanks to AI",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Not researched in depth this run.",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-software-2030-yearproject",
+   "domain": "software",
+   "year": 2030,
+   "text": "AI completes a year-long software project end to end with minimal human input (verified)",
+   "kind": "capability",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-robotics-2027-tensk",
+   "domain": "robotics",
+   "year": 2027,
+   "text": "Tens of thousands of humanoids in verified commercial deployment worldwide",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Shipments exceeded 22,000 in H1 2026, but analysts estimate only about 3,000–4,000 humanoids do repeated paid work. 'Verified deployment' is the bar, not shipments.",
+     "source_ids": [
+      "src-humanoid-techrepublic",
+      "src-humanoid-ai2work"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-robotics-2028-home",
+   "domain": "robotics",
+   "year": 2028,
+   "text": "First useful home robots sold to consumers at roughly used-car prices",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "1X NEO takes $20,000 preorders with U.S. delivery planned for 2026, but delivery and usefulness are unverified and teleoperation is part of the product. Announcement, not achievement.",
+     "source_ids": [
+      "src-1x-eweek"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-robotics-2029-factories",
+   "domain": "robotics",
+   "year": 2029,
+   "text": "Mostly automated humanoid factories; humanoid unit price trending toward $10k for capable models",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Unitree R1 lists at $5,900 (research/education); Figure's BotQ reportedly reached about one robot per hour.",
+     "source_ids": [
+      "src-1x-eweek",
+      "src-humanoid-guide"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-robotics-2030-eldercare",
+   "domain": "robotics",
+   "year": 2030,
+   "text": "Elder-care helper robots deployed at scale in Japan or South Korea",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-robotics-2032-laptop",
+   "domain": "robotics",
+   "year": 2032,
+   "text": "Capable home robot priced like a high-end laptop",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-robotics-2033-harvest",
+   "domain": "robotics",
+   "year": 2033,
+   "text": "Robots handle a majority of harvesting for at least one major crop",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-robotics-2034-surgery",
+   "domain": "robotics",
+   "year": 2034,
+   "text": "Routine surgeries performed autonomously under surgeon supervision (approved)",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-robotics-2035-homes",
+   "domain": "robotics",
+   "year": 2035,
+   "text": "Humanoids common in middle-class homes in at least one country",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-robotics-2040-morethancars",
+   "domain": "robotics",
+   "year": 2040,
+   "text": "More robots than cars in operation in at least one major economy",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-cars-2027-25cities",
+   "domain": "cars",
+   "year": 2027,
+   "text": "Paid driverless robotaxi service in 25+ cities worldwide",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "on-track",
+   "confidence": "high",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "on-track",
+     "reason": "Waymo alone runs paid driverless rides in about 14 U.S. cities; Baidu Apollo Go reports 26–28 cities and Pony.ai and WeRide add more. Not marked confirmed because company city counts mix driverless and safety-driver or test operations; needs a per-city driverless tally.",
+     "source_ids": [
+      "src-waymo-dtc",
+      "src-apollo-equal"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-cars-2028-trucking",
+   "domain": "cars",
+   "year": 2028,
+   "text": "Driverless trucking operating commercially on major highway corridors in the U.S. or China",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "early",
+   "confidence": "high",
+   "years_early": 2,
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "early",
+     "reason": "Aurora began commercial driverless freight (no human in the cab) between Dallas and Houston in May 2025 for Hirschbach and Uber Freight, later adding Fort Worth–El Paso and Phoenix lanes. Two independent secondary sources. Caveats: scale is still small, Aurora trimmed its fleet in early 2026, and one truck maker asked for an observer in the cab.",
+     "source_ids": [
+      "src-aurora-tc",
+      "src-aurora-ttnews",
+      "src-aurora-truckinginfo"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-cars-2028-safety",
+   "domain": "cars",
+   "year": 2028,
+   "text": "Peer-reviewed or regulator data show robotaxis with substantially lower injury crash rates than human drivers at large scale",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "on-track",
+   "confidence": "high",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "on-track",
+     "reason": "An independent IIHS study (July 2026, 50M driverless miles) found 81% fewer injury crashes per mile for Waymo; Waymo's peer-reviewed-method analyses report 92–94% fewer serious-injury crashes over 220M miles. Not yet marked confirmed: the IIHS report is independent but not described as peer-reviewed or regulator data.",
+     "source_ids": [
+      "src-iihs-claims",
+      "src-waymo-evwire"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-cars-2030-pricecomp",
+   "domain": "cars",
+   "year": 2030,
+   "text": "Robotaxi rides price-competitive with owning a car in major cities",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-cars-2030-evcheaper",
+   "domain": "cars",
+   "year": 2030,
+   "text": "Battery pack costs fall enough that EVs are cheaper to buy than comparable gas cars without subsidies in most major markets",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Pack prices hit a record low $108/kWh in 2025 ($84 in China); BNEF forecasts about $105 in 2026, a slower decline as raw materials rise.",
+     "source_ids": [
+      "src-bnef-2025"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-cars-2035-mostcities",
+   "domain": "cars",
+   "year": 2035,
+   "text": "Driverless vehicles available in most large cities in the U.S., China and Europe",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-cars-2040-deaths",
+   "domain": "cars",
+   "year": 2040,
+   "text": "Road deaths fall sharply in countries with high autonomous adoption",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-medicine-2027-aidrug",
+   "domain": "medicine",
+   "year": 2027,
+   "text": "First AI-discovered drug receives FDA approval",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "on-track",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "on-track",
+     "reason": "FDA accepted Takeda's zasocitinib NDA under Priority Review with a PDUFA date in Q1 2027; it beat Sotyktu head to head in Phase 3. Caveat: zasocitinib came from a physics-based computational platform, so whether it counts as 'AI-discovered' is debatable.",
+     "source_ids": [
+      "src-takeda-zaso"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-medicine-2029-digitaltwin",
+   "domain": "medicine",
+   "year": 2029,
+   "text": "AI-designed clinical trials or simulated \"digital twin\" patients accepted by regulators as part of approval evidence",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Not researched in depth this run.",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-medicine-2030-mrna",
+   "domain": "medicine",
+   "year": 2030,
+   "text": "Personalized mRNA cancer vaccines approved for at least one cancer",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "on-track",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "on-track",
+     "reason": "INTerpath-001 (intismeran + Keytruda, 1,137 patients, resected melanoma) met its recurrence-free survival primary endpoint at interim analysis in Aug 2026, the first positive Phase 3 for an individualized neoantigen therapy. Full data not yet released.",
+     "source_ids": [
+      "src-pharmaphorum-intismeran"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-medicine-2030-rentosertib",
+   "domain": "medicine",
+   "year": 2030,
+   "text": "Rentosertib (AI-designed) approved for idiopathic pulmonary fibrosis",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "on-track",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "on-track",
+     "reason": "First patient dosed in the 52-week GENESIS-IPF-3 Phase III on Sept 9, 2026, consistent with the company's 2030 target. Phase III outcomes are unknown and many IPF drugs have failed late.",
+     "source_ids": [
+      "src-insilico-newsmed",
+      "src-rtt-insilico"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-medicine-2031-geneediting",
+   "domain": "medicine",
+   "year": 2031,
+   "text": "Gene-editing cures approved for several more inherited diseases, with costs falling",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Not researched in depth this run.",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-medicine-2033-aging",
+   "domain": "medicine",
+   "year": 2033,
+   "text": "First drug targeting the biology of aging approved for an age-related disease",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-medicine-2034-alzheimers",
+   "domain": "medicine",
+   "year": 2034,
+   "text": "Alzheimer's progression sharply slowed or prevented in high-risk people (approved treatment)",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Not researched in depth this run.",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-medicine-2035-cancers",
+   "domain": "medicine",
+   "year": 2035,
+   "text": "Many common cancers curable or manageable as chronic conditions",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-medicine-2036-organs",
+   "domain": "medicine",
+   "year": 2036,
+   "text": "Lab-grown or animal-donor organs meaningfully reduce transplant waitlists",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-medicine-2038-healthspan",
+   "domain": "medicine",
+   "year": 2038,
+   "text": "Measurable gains in healthy lifespan for people alive today",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2027-psilocybin",
+   "domain": "mental-health",
+   "year": 2027,
+   "text": "First classic psychedelic medicine (psilocybin) FDA-approved and launched",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "on-track",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "on-track",
+     "reason": "Compass completed the COMP360 NDA on Nov 9, 2026 (two positive Phase 3 trials, 1,000+ participants) with a National Priority Voucher; launch guided for H1 2027 if approved. Still needs FDA filing acceptance, approval and DEA rescheduling.",
+     "source_ids": [
+      "src-compass-pr",
+      "src-psychtimes-comp360"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2027-aitherapy",
+   "domain": "mental-health",
+   "year": 2027,
+   "text": "An AI therapy app gets regulatory clearance as a supervised treatment",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Positive RCTs exist (Therabot; Kai in JAMA Network Open, Apr 2026), but no FDA clearance of a generative-AI therapy app was found.",
+     "source_ids": [
+      "src-kai-eurekalert",
+      "src-therabot-dartmouth"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2028-ptsd-psilocybin",
+   "domain": "mental-health",
+   "year": 2028,
+   "text": "Psilocybin therapy approved for PTSD",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2029-wearables",
+   "domain": "mental-health",
+   "year": 2029,
+   "text": "Wearables clinically validated to detect early signs of depression or mania episodes",
+   "kind": "capability",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2030-biomarker",
+   "domain": "mental-health",
+   "year": 2030,
+   "text": "Biomarker or genetic tests routinely used to choose the first antidepressant",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2031-stimulation",
+   "domain": "mental-health",
+   "year": 2031,
+   "text": "Personalized brain stimulation widely available for treatment-resistant cases",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2032-free247",
+   "domain": "mental-health",
+   "year": 2032,
+   "text": "Free, evidence-based AI mental health support available 24/7 in most languages, with human escalation",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2033-schizo",
+   "domain": "mental-health",
+   "year": 2033,
+   "text": "New schizophrenia/bipolar drugs with far fewer side effects approved",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2034-craving",
+   "domain": "mental-health",
+   "year": 2034,
+   "text": "Craving-reducing drugs become standard addiction treatment",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2035-ptsdweeks",
+   "domain": "mental-health",
+   "year": 2035,
+   "text": "PTSD routinely treatable in weeks",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-mh-2038-suicide",
+   "domain": "mental-health",
+   "year": 2038,
+   "text": "Suicide rates drop substantially in countries with universal mental health access",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-hc-2027-scribes",
+   "domain": "healthcare",
+   "year": 2027,
+   "text": "AI note-taking used in most U.S. doctor visits",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Strong uptake inside large systems (about 70% of UCSF physicians), but no reliable national figure; one estimate says about a third of providers have access, and uptake at one cancer center was about 20%.",
+     "source_ids": [
+      "src-medecon-scribes",
+      "src-healio-scribes"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-hc-2028-imaging",
+   "domain": "healthcare",
+   "year": 2028,
+   "text": "AI second reads standard for medical imaging in major health systems",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Not researched in depth this run.",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-hc-2028-mced",
+   "domain": "healthcare",
+   "year": 2028,
+   "text": "Early cancer detection blood tests covered by major insurers for routine screening",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "A Feb 2026 law opens a Medicare path (starting 2028 or 2029 depending on source) that requires FDA approval plus a CMS coverage decision. An FDA panel backed Galleri 7-2; no final decision. No USPSTF recommendation, so commercial coverage lags.",
+     "source_ids": [
+      "src-beckers-galleri",
+      "src-npr-galleri"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-hc-2036-mhdays",
+   "domain": "healthcare",
+   "year": 2036,
+   "text": "Mental health appointments available within days for most people in at least one country with universal access",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-hc-2037-wholebody",
+   "domain": "healthcare",
+   "year": 2037,
+   "text": "Affordable routine whole-body screening",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-hc-2039-homediag",
+   "domain": "healthcare",
+   "year": 2039,
+   "text": "Home diagnostics replace a large share of in-person visits",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded",
+     "source_ids": []
+    }
+   ]
+  },
+  {
+   "id": "pred-energy-2028-grid",
+   "domain": "energy",
+   "year": 2028,
+   "text": "Major new power supply (gas, nuclear restarts, solar+storage) noticeably shortens data center grid connection waits",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "slipping",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "slipping",
+     "reason": "Waits are lengthening, not shortening: 3–4 years in PJM/ERCOT load zones (Carbon Direct), up to 7+ years in Northern Virginia, and transformer lead times of 18–24 months. ERCOT's large-load queue is several times its peak demand.",
+     "source_ids": [
+      "src-carbondirect",
+      "src-networkworld-google"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-energy-2033-fusion",
+   "domain": "energy",
+   "year": 2033,
+   "text": "First fusion pilot plant delivers electricity to a grid",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Helion reports record 150M °C and measurable D-T fusion (company-reported) and targets power to Microsoft by 2028; CFS SPARC first plasma now expected around 2027. No net-energy demonstration yet.",
+     "source_ids": [
+      "src-helion-bw",
+      "src-tc-helion"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-energy-2036-cheaper",
+   "domain": "energy",
+   "year": 2036,
+   "text": "Solar, storage and fusion make electricity cost noticeably lower than 2026 in real terms",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Stationary storage packs averaged $70/kWh in 2025.",
+     "source_ids": [
+      "src-bnef-2025"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-society-2028-income",
+   "domain": "society",
+   "year": 2028,
+   "text": "A national government enacts a broad income-support program explicitly tied to AI displacement",
+   "kind": "deployment",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Guaranteed-income pilots continue (e.g. Wales care leavers), but no national AI-linked program found. The seed claim of a UK minister floating UBI in Jan 2026 could not be verified this run.",
+     "source_ids": [
+      "src-bigissue-ubi"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-society-2030-productivity",
+   "domain": "society",
+   "year": 2030,
+   "text": "Official statistics show a clear AI-driven productivity jump (≥1 percentage point/year above trend) in at least one major economy",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "medium",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "U.S. productivity is running about 0.6 pp/yr above the 2007–2019 pace (2.1% vs 1.5%), and Q3 2026 hit 3.6%, but the BLS cannot attribute it to AI.",
+     "source_ids": [
+      "src-axios-prod",
+      "src-advisor-prod"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pred-society-2035-basket",
+   "domain": "society",
+   "year": 2035,
+   "text": "Measurable fall in the cost of a basket of common goods attributable to automation",
+   "kind": "impact",
+   "origin": "seed",
+   "status": "pending",
+   "confidence": "low",
+   "history": [
+    {
+     "date": "2026-11-14",
+     "status": "pending",
+     "reason": "Seeded. Electronics prices are currently rising because of AI-driven memory demand.",
+     "source_ids": [
+      "src-pcworld-msi"
+     ]
+    }
+   ]
+  }
+ ],
+ "milestones": [
+  {
+   "id": "ms-metr-anth-speedup",
+   "domain": "ai",
+   "date": "2026-11-05",
+   "title": "First independent measurement of AI accelerating AI research",
+   "summary": "METR's high-access review estimates Anthropic's capability trend has run about 1.9x faster since Oct 2025 (95% CI 1.5–2.8x), with roughly 80% of the acceleration attributed to researchers using AI. Partly redacted; one lab only.",
+   "kind": "capability",
+   "significance": "first-ever",
+   "source_ids": [
+    "src-metr-anth"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-metr-th11",
+   "domain": "ai",
+   "date": "2026-01",
+   "title": "METR Time Horizon 1.1 expands long-task suite",
+   "summary": "METR more than doubled its long tasks (14 to 31, each 8h+ for humans) because frontier models were saturating the old suite.",
+   "kind": "capability",
+   "significance": "notable",
+   "source_ids": [
+    "src-metr-th",
+    "src-epoch-th"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-anth-80pct",
+   "domain": "software",
+   "date": "2026-06",
+   "title": "Claude writes over 80% of Anthropic's merged code",
+   "summary": "Anthropic reported that more than 80% of code merged into its production codebase in May 2026 was written by Claude, up from low single digits before Claude Code. Company self-report.",
+   "kind": "deployment",
+   "significance": "major",
+   "source_ids": [
+    "src-anth-tnw",
+    "src-anth-lds"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-octoverse-agents",
+   "domain": "software",
+   "date": "2026-10-28",
+   "title": "Agents open 40%+ of GitHub pull requests",
+   "summary": "A summary of GitHub's Octoverse 2026 says detectable AI agents started more than 40% of pull requests in September, up from 17% in March. Secondary source; primary report not read.",
+   "kind": "deployment",
+   "significance": "major",
+   "source_ids": [
+    "src-octoverse-summary"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-jetbrains-47",
+   "domain": "software",
+   "date": "2026-08",
+   "title": "Developers say 47% of their work code is agent-generated",
+   "summary": "JetBrains' survey of 15,000+ developers found respondents attribute about 47% of their work code to AI agents on average. Self-reported; DX's merged-code measure is closer to 30%.",
+   "kind": "deployment",
+   "significance": "notable",
+   "source_ids": [
+    "src-jetbrains",
+    "src-dx"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-quantinuum-qec",
+   "domain": "computing",
+   "date": "2026",
+   "title": "Record-low logical error rate on a trapped-ion machine",
+   "summary": "A Quantinuum preprint reports about 5×10⁻⁶ logical error per correction round on its 98-qubit Helios system, well below the color-code threshold. Preprint; real progress but not yet commercially useful.",
+   "kind": "capability",
+   "significance": "notable",
+   "source_ids": [
+    "src-quantinuum-postq"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-humanoid-h1",
+   "domain": "robotics",
+   "date": "2026-06",
+   "title": "Humanoid shipments top 22,000 in six months",
+   "summary": "Counterpoint counted over 22,000 humanoids shipped in H1 2026, up nearly 300% year over year, with Chinese vendors (AgiBot, Unitree) leading. Shipments, not verified deployments.",
+   "kind": "deployment",
+   "significance": "major",
+   "source_ids": [
+    "src-humanoid-techrepublic"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-figure-bmw",
+   "domain": "robotics",
+   "date": "2026",
+   "title": "Figure 03 moves into logistics work at BMW Spartanburg",
+   "summary": "After Figure 02 units contributed to production of over 30,000 BMW X3s, Figure retired them and moved Figure 03 into a logistics sequencing task at the same plant.",
+   "kind": "deployment",
+   "significance": "notable",
+   "source_ids": [
+    "src-humanoid-guide",
+    "src-iiot-humanoid"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-waymo-14",
+   "domain": "cars",
+   "date": "2026-09-22",
+   "title": "Waymo paid driverless rides reach about 14 U.S. cities",
+   "summary": "Launches in Denver, San Diego and Tampa brought Waymo's commercial driverless service to about 14 U.S. cities, with a fleet of over 4,000 and about 500,000 paid rides a week.",
+   "kind": "deployment",
+   "significance": "major",
+   "source_ids": [
+    "src-waymo-dtc",
+    "src-waymo-dealroom",
+    "src-waymo-sherwood"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-iihs-waymo",
+   "domain": "cars",
+   "date": "2026-07-23",
+   "title": "Independent IIHS study: 81% fewer injury crashes than humans",
+   "summary": "Across 50 million driverless miles in four cities, IIHS found Waymo had 68% fewer police-reportable crashes and 81% fewer injury crashes per mile than human drivers. Results varied by city.",
+   "kind": "impact",
+   "significance": "first-ever",
+   "source_ids": [
+    "src-iihs-claims"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-apollo-top",
+   "domain": "cars",
+   "date": "2026-06-25",
+   "title": "Baidu Apollo Go overtakes Waymo in global rankings",
+   "summary": "Chinese operators took three of the top five global robotaxi spots, with Apollo Go reporting operations in 26–28 cities worldwide. Company city counts include mixed operating modes.",
+   "kind": "deployment",
+   "significance": "notable",
+   "source_ids": [
+    "src-apollo-equal"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-aurora-driverless",
+   "domain": "cars",
+   "date": "2025-05-01",
+   "title": "First commercial driverless heavy trucks on U.S. highways",
+   "summary": "Aurora began hauling customer freight between Dallas and Houston with no human in the cab, later adding El Paso and Phoenix lanes. Before this tracker's start, recorded because it confirms a prediction.",
+   "kind": "deployment",
+   "significance": "first-ever",
+   "source_ids": [
+    "src-aurora-tc",
+    "src-aurora-ttnews"
+   ],
+   "confirms_prediction_ids": [
+    "pred-cars-2028-trucking"
+   ],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-bnef-108",
+   "domain": "cars",
+   "date": "2025-12-09",
+   "title": "Battery packs hit record low $108/kWh",
+   "summary": "BNEF's 2025 survey found average lithium-ion pack prices fell 8% to $108/kWh; China averaged $84 and stationary storage $70.",
+   "kind": "impact",
+   "significance": "notable",
+   "source_ids": [
+    "src-bnef-2025"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-zaso-priority",
+   "domain": "medicine",
+   "date": "2026-09-14",
+   "title": "Computationally designed zasocitinib gets FDA Priority Review",
+   "summary": "FDA accepted Takeda's psoriasis drug application with a decision due in Q1 2027, after it beat Sotyktu head to head. Still investigational.",
+   "kind": "capability",
+   "significance": "major",
+   "source_ids": [
+    "src-takeda-zaso"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-rentosertib-p3",
+   "domain": "medicine",
+   "date": "2026-09-09",
+   "title": "Generative-AI drug rentosertib starts Phase III",
+   "summary": "Insilico dosed the first patients in a 52-week, placebo-controlled Phase III in idiopathic pulmonary fibrosis (about 320 patients). Investigational.",
+   "kind": "capability",
+   "significance": "major",
+   "source_ids": [
+    "src-insilico-newsmed",
+    "src-rtt-insilico"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-intismeran-p3",
+   "domain": "medicine",
+   "date": "2026-08-19",
+   "title": "First positive Phase 3 for a personalized mRNA cancer vaccine",
+   "summary": "Moderna and Merck's intismeran plus Keytruda cut melanoma recurrence versus Keytruda alone at interim analysis (1,137 patients). Effect size not yet disclosed; not approved.",
+   "kind": "capability",
+   "significance": "first-ever",
+   "source_ids": [
+    "src-pharmaphorum-intismeran"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-comp360-nda",
+   "domain": "mental-health",
+   "date": "2026-11-09",
+   "title": "First-ever psilocybin drug application completed",
+   "summary": "Compass Pathways completed its FDA application for COMP360 in treatment-resistant depression, backed by two Phase 3 trials. Not approved; FDA acceptance and DEA rescheduling still required.",
+   "kind": "capability",
+   "significance": "first-ever",
+   "source_ids": [
+    "src-compass-pr",
+    "src-psychtimes-comp360"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-kai-rct",
+   "domain": "mental-health",
+   "date": "2026-04-14",
+   "title": "AI chatbot beats group therapy on anxiety in 995-person RCT",
+   "summary": "In JAMA Network Open, students using the Kai chatbot for 12 weeks improved modestly more on anxiety and well-being than group therapy or waitlist. Lead author is Kai's chief psychologist.",
+   "kind": "capability",
+   "significance": "notable",
+   "source_ids": [
+    "src-kai-eurekalert"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-galleri-panel",
+   "domain": "healthcare",
+   "date": "2026-10",
+   "title": "FDA panel backs first multi-cancer blood test",
+   "summary": "An FDA advisory panel voted 7-2 (one abstention) that Grail's Galleri test's benefits outweigh its risks. Final FDA decision pending. Month is approximate.",
+   "kind": "capability",
+   "significance": "major",
+   "source_ids": [
+    "src-beckers-galleri"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-mced-law",
+   "domain": "healthcare",
+   "date": "2026-02-03",
+   "title": "U.S. law creates Medicare path for multi-cancer screening tests",
+   "summary": "Coverage begins in 2028 or 2029 (sources differ) for FDA-approved tests, after a CMS coverage decision, phased in by age.",
+   "kind": "impact",
+   "significance": "major",
+   "source_ids": [
+    "src-npr-galleri",
+    "src-beckers-galleri"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-ucsf-scribes",
+   "domain": "healthcare",
+   "date": "2026-01",
+   "title": "70% of UCSF physicians use AI scribes daily",
+   "summary": "A JAMA Network Open study found broad daily use at UCSF; Kaiser Permanente offers ambient scribes to 25,000+ clinicians.",
+   "kind": "deployment",
+   "significance": "notable",
+   "source_ids": [
+    "src-medecon-scribes"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-helion-dt",
+   "domain": "energy",
+   "date": "2026-02-13",
+   "title": "Helion reports 150 million °C and private D-T fusion",
+   "summary": "Helion says its Polaris prototype reached 150M °C and became the first privately built machine to run measurable deuterium-tritium fusion. Company-reported; no breakeven claim.",
+   "kind": "capability",
+   "significance": "first-ever",
+   "source_ids": [
+    "src-helion-bw",
+    "src-tc-helion"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-q3-productivity",
+   "domain": "society",
+   "date": "2026-11-05",
+   "title": "U.S. productivity grows 3.6% in Q3",
+   "summary": "BLS preliminary data beat expectations; unit labor costs fell 0.7% and labor's share hit a record-low 53.0%. AI's contribution can't be isolated.",
+   "kind": "impact",
+   "significance": "notable",
+   "source_ids": [
+    "src-axios-prod",
+    "src-advisor-prod"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  },
+  {
+   "id": "ms-stanford-canaries",
+   "domain": "society",
+   "date": "2026-08",
+   "title": "Young workers in AI-exposed jobs: 19% employment gap",
+   "summary": "Stanford's ADP-based update finds employment of 22–25-year-olds in highly exposed occupations is about 19% below expectation, up from 15%, mostly via hiring. No economy-wide displacement found.",
+   "kind": "impact",
+   "significance": "major",
+   "source_ids": [
+    "src-stanford-canaries",
+    "src-dallasfed"
+   ],
+   "confirms_prediction_ids": [],
+   "added": "2026-11-14"
+  }
+ ],
+ "roadblocks": [
+  {
+   "id": "rb-memory",
+   "domain": "computing",
+   "title": "Memory shortage (DRAM, HBM, NAND)",
+   "summary": "AI servers absorb memory supply; conventional DRAM contract prices rose 90–95% in Q1 2026 and kept climbing. 2027 output may meet only about 60% of demand.",
+   "severity": "high",
+   "trend": "worsening",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-trendforce-q1",
+    "src-trendforce-3q",
+    "src-techwire-2027"
+   ]
+  },
+  {
+   "id": "rb-pc-prices",
+   "domain": "computing",
+   "title": "Consumer PC and GPU prices rising",
+   "summary": "PC makers expect 20–40% increases in 2026; Nvidia reportedly raised GPU kit prices three times; budget cards may be cut. Micron exited the Crucial consumer brand.",
+   "severity": "high",
+   "trend": "worsening",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-pcworld-msi",
+    "src-techinsider-acer"
+   ]
+  },
+  {
+   "id": "rb-gw-claims",
+   "domain": "computing",
+   "title": "Gigawatt data center claims hard to verify",
+   "summary": "Lists of 'first 1 GW' sites conflict and mostly rest on company timelines, not measured IT load.",
+   "severity": "low",
+   "trend": "stable",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-epoch-gw"
+   ]
+  },
+  {
+   "id": "rb-measurement",
+   "domain": "ai",
+   "title": "Capability measurement is saturating",
+   "summary": "METR's time-horizon suite is unreliable above about 16 hours, GPQA Diamond is about 96% saturated, and lab-permitted redactions limited what METR could publish.",
+   "severity": "medium",
+   "trend": "worsening",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-metr-th",
+    "src-metr-anth"
+   ]
+  },
+  {
+   "id": "rb-code-trust",
+   "domain": "software",
+   "title": "Trust and review bottlenecks for AI code",
+   "summary": "96% of developers say they don't fully trust AI-generated code; higher volume strains CI and review.",
+   "severity": "medium",
+   "trend": "stable",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-sonar"
+   ]
+  },
+  {
+   "id": "rb-humanoid-gap",
+   "domain": "robotics",
+   "title": "Shipments far exceed real deployments",
+   "summary": "Only an estimated 3,000–4,000 humanoids do repeated paid work; Agility's factory ran at about 1.3% of capacity in 2025; home-robot pitches still lean on teleoperation.",
+   "severity": "medium",
+   "trend": "stable",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-humanoid-ai2work",
+    "src-1x-eweek"
+   ]
+  },
+  {
+   "id": "rb-av-variance",
+   "domain": "cars",
+   "title": "Uneven safety and slow trucking scale-up",
+   "summary": "Waymo's crash advantage ranges from 76% (Phoenix) to none (Austin, small sample). Aurora trimmed its driverless fleet in early 2026 and a partner OEM required an in-cab observer.",
+   "severity": "low",
+   "trend": "stable",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-iihs-claims",
+    "src-aurora-ttnews",
+    "src-aurora-truckinginfo"
+   ]
+  },
+  {
+   "id": "rb-ai-drug-attrition",
+   "domain": "medicine",
+   "title": "No AI-discovered drug approved yet",
+   "summary": "Despite 100+ programs in trials, approvals are zero and Phase 2 failure rates look similar to traditional drugs. 'AI-discovered' has no standard definition.",
+   "severity": "medium",
+   "trend": "stable",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-intuition-aidrugs",
+    "src-ai2work-zero"
+   ]
+  },
+  {
+   "id": "rb-psychedelic-sched",
+   "domain": "mental-health",
+   "title": "Psilocybin needs FDA acceptance and DEA rescheduling",
+   "summary": "COMP360's application has not yet been accepted for review; if approved, psilocybin must be rescheduled federally and by states before launch.",
+   "severity": "medium",
+   "trend": "stable",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-psychtimes-comp360"
+   ]
+  },
+  {
+   "id": "rb-ai-therapy-reg",
+   "domain": "mental-health",
+   "title": "No cleared generative-AI therapy; conflicts of interest",
+   "summary": "FDA has not cleared any generative-AI therapy app; key trial evidence is small or company-linked.",
+   "severity": "medium",
+   "trend": "stable",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-therabot-dartmouth",
+    "src-kai-eurekalert"
+   ]
+  },
+  {
+   "id": "rb-mced-evidence",
+   "domain": "healthcare",
+   "title": "Mixed evidence for multi-cancer blood tests",
+   "summary": "The NHS-Galleri trial missed its primary endpoint of reducing late-stage cancers; coverage is moving ahead of mortality data.",
+   "severity": "medium",
+   "trend": "stable",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-beckers-galleri",
+    "src-npr-galleri"
+   ]
+  },
+  {
+   "id": "rb-scribe-modest",
+   "domain": "healthcare",
+   "title": "AI scribe gains are modest and costly",
+   "summary": "Studies show modest documentation-time savings; a UK review found notes missed patient experiences; small practices cite about $500/month cost.",
+   "severity": "low",
+   "trend": "stable",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-healio-scribes",
+    "src-ukscribes"
+   ]
+  },
+  {
+   "id": "rb-grid",
+   "domain": "energy",
+   "title": "Grid connection backlogs",
+   "summary": "Data centers wait 3–4 years in PJM/ERCOT load zones and longer in Northern Virginia; transformer and switchgear lead times are 18–24 months.",
+   "severity": "high",
+   "trend": "worsening",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-carbondirect",
+    "src-networkworld-google"
+   ]
+  },
+  {
+   "id": "rb-fusion-timeline",
+   "domain": "energy",
+   "title": "Fusion timelines slipping",
+   "summary": "SPARC first plasma now looks like 2027; Helion hasn't claimed breakeven while targeting grid power by 2028.",
+   "severity": "medium",
+   "trend": "stable",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-tc-helion"
+   ]
+  },
+  {
+   "id": "rb-entry-jobs",
+   "domain": "society",
+   "title": "Entry-level hiring squeeze",
+   "summary": "Young workers in AI-exposed jobs face a widening employment gap; Fed researchers say weak overall hiring explains more of youth unemployment than AI. Labor's income share hit a record low.",
+   "severity": "medium",
+   "trend": "worsening",
+   "first_seen": "2026-11-14",
+   "last_updated": "2026-11-14",
+   "source_ids": [
+    "src-stanford-canaries",
+    "src-bgov-stlfed",
+    "src-axios-prod"
+   ]
+  }
+ ],
+ "sources": [
+  {
+   "id": "src-metr-th",
+   "title": "Measuring AI Ability to Complete Long Tasks (Time Horizon 1.1)",
+   "publisher": "METR",
+   "url": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/",
+   "published": "2025-03-19",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-epoch-th",
+   "title": "METR Time Horizons benchmark data",
+   "publisher": "Epoch AI",
+   "url": "https://epoch.ai/benchmarks/metr-time-horizons",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-metr-anth",
+   "title": "Assessment of AI R&D acceleration at Anthropic",
+   "publisher": "METR",
+   "url": "https://metr.org/blog/2026-11-05-anthropic-ai-rd-acceleration-assessment",
+   "published": "2026-11-05",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-anth-tnw",
+   "title": "Anthropic says Claude writes 80% of its own code",
+   "publisher": "The Next Web",
+   "url": "https://thenextweb.com/news/anthropic-claude-recursive-self-improvement-code",
+   "published": "2026-06",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-anth-lds",
+   "title": "Anthropic Reports Claude Authors Most Production Code",
+   "publisher": "Let's Data Science",
+   "url": "https://letsdatascience.com/news/anthropic-reports-claude-authors-most-production-code-10ebe7f9",
+   "published": "2026-06",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-jetbrains",
+   "title": "How Much Code Do Developers Really Let Agents Write?",
+   "publisher": "JetBrains Research",
+   "url": "https://blog.jetbrains.com/research/2026/08/how-much-code-do-developers-really-let-agents-write/",
+   "published": "2026-08",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-sonar",
+   "title": "State of Code Developer Survey Report",
+   "publisher": "Sonar",
+   "url": "https://www.sonarsource.com/blog/state-of-code-developer-survey-report-the-current-reality-of-ai-coding/",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-dx",
+   "title": "AI-generated merged code holds steady at ~30%",
+   "publisher": "DX",
+   "url": "https://getdx.com/blog/ai-generated-merged-code-holds-steady-at-30/",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-octoverse-summary",
+   "title": "AI coding agents in GitHub Octoverse 2026",
+   "publisher": "AI Eating the World",
+   "url": "https://www.aieatingtheworld.com/articles/ai-coding-agents-github-octoverse-2026",
+   "published": "2026-10-28",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-trendforce-q1",
+   "title": "TrendForce press release on 1Q26 memory contract prices",
+   "publisher": "TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260331-12995.html",
+   "published": "2026-03-31",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-trendforce-2q",
+   "title": "AI Server Demand to Drive Memory Contract Price Increases in 2Q26",
+   "publisher": "EMSNow (TrendForce release)",
+   "url": "https://www.emsnow.com/?p=53925",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-trendforce-3q",
+   "title": "Server DRAM Contract Prices to Rise 13–18% QoQ in 3Q26",
+   "publisher": "I-Connect007 (TrendForce release)",
+   "url": "https://iconnect007.com/article/150723/server-dram-contract-prices-to-rise-1318-qoq-in-3q26-amid-longterm-price-caps/150720/smt",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-techwire-2027",
+   "title": "Memory shortage 2027: supply-demand gap",
+   "publisher": "Tech Wire Asia",
+   "url": "https://techwireasia.com/2026/04/memory-shortage-2027-supply-demand-gap/",
+   "published": "2026-04",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-techspot-idc",
+   "title": "Memory shortages raise PC and smartphone prices",
+   "publisher": "TechSpot",
+   "url": "https://www.techspot.com/news/110679-memory-shortages-raise-pc-smartphone-prices-8-2026.html",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-pcworld-msi",
+   "title": "MSI raising PC prices up to 30% as memory crisis drags on",
+   "publisher": "PCWorld",
+   "url": "https://www.pcworld.com/article/3089909/msi-raising-pc-prices-up-to-30-as-memory-crisis-drags-on.html",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-techinsider-acer",
+   "title": "Acer PC price increase amid memory crisis",
+   "publisher": "Tech Insider",
+   "url": "https://tech-insider.org/acer-pc-price-increase-memory-crisis-2026/",
+   "published": "2026-09",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-epoch-gw",
+   "title": "Build times for gigawatt-scale data centers can be 2 years or less",
+   "publisher": "Epoch AI",
+   "url": "https://epochai.substack.com/p/build-times-for-gigawatt-scale-data",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-quantinuum-postq",
+   "title": "Quantinuum color code on Helios",
+   "publisher": "PostQuantum",
+   "url": "https://postquantum.com/industry-news/quantinuum-color-code-helios/",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-humanoid-techrepublic",
+   "title": "Humanoid Robot Shipments Surge as Chinese Vendors Capture 97% Share",
+   "publisher": "TechRepublic",
+   "url": "https://techrepublic.com/article/news-humanoid-robot-shipments-chinese-vendors",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-humanoid-ai2work",
+   "title": "Humanoid Robot Production Numbers: The Reality Behind the Hype",
+   "publisher": "ai2.work",
+   "url": "https://ai2.work/blog/humanoid-robot-production-numbers-the-reality-behind-the-hype",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-humanoid-guide",
+   "title": "Humanoid deployments in 2026 favor Figure and Agility",
+   "publisher": "Humanoid.guide",
+   "url": "https://humanoid.guide/humanoid-deployments-in-2026-favor-figure-and-agility/",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-iiot-humanoid",
+   "title": "Humanoid robots beyond automotive in 2026",
+   "publisher": "IIoT World",
+   "url": "https://iiot-world.com/artificial-intelligence-ml/robotics/humanoid-robots-non-automotive-2026/",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-1x-eweek",
+   "title": "1X's $20K Robot Targets US Homes in 2026",
+   "publisher": "eWeek",
+   "url": "https://www.eweek.com/news/1x-neo-humanoid-home-robot-2026/",
+   "published": "2025",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-waymo-sherwood",
+   "title": "Waymo's now serving more than 500,000 paid robotaxi rides every week",
+   "publisher": "Sherwood News",
+   "url": "https://www.sherwood.news/tech/waymos-now-serving-more-than-500-000-paid-robotaxi-rides-every-week/",
+   "published": "2026-03",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-waymo-dtc",
+   "title": "Waymo driverless rides in Denver, San Diego and Tampa",
+   "publisher": "Drive Tesla Canada",
+   "url": "https://driveteslacanada.ca/news/waymo-driverless-rides-denver-san-diego-tampa/",
+   "published": "2026-09-22",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-waymo-dealroom",
+   "title": "Waymo hits 4,000 robotaxis as Texas fleet jumps",
+   "publisher": "Dealroom News",
+   "url": "https://dealroom.co/news/156473-waymo-hits-4-000-robotaxis-as-texas-fleet-jumps-49-on-new-zeekr-minivans/",
+   "published": "2026-09",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-apollo-equal",
+   "title": "Baidu's Apollo Go Overtakes Waymo as Chinese Operators Claim Three of Top Five",
+   "publisher": "EqualOcean",
+   "url": "https://equalocean.com/news/2026062521966",
+   "published": "2026-06-25",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-aurora-tc",
+   "title": "Aurora launches commercial self-driving truck service in Texas",
+   "publisher": "TechCrunch",
+   "url": "https://techcrunch.com/2025/05/01/aurora-launches-commercial-self-driving-truck-service-in-texas",
+   "published": "2025-05-01",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-aurora-ttnews",
+   "title": "Aurora Expands Driverless Network for Runs to Phoenix",
+   "publisher": "Transport Topics",
+   "url": "https://www.ttnews.com/articles/aurora-earnings-q4-2025",
+   "published": "2026-02",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-aurora-truckinginfo",
+   "title": "Aurora rolls out next generation of driverless trucks",
+   "publisher": "Heavy Duty Trucking",
+   "url": "https://www.truckinginfo.com/news/aurora-rolls-out-next-generation-of-driverless-trucks-for-commercial-freight",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-bnef-2025",
+   "title": "Lithium-ion battery pack prices fall to $108 per kilowatt-hour",
+   "publisher": "BloombergNEF",
+   "url": "https://about.bnef.com/insights/clean-energy/lithium-ion-battery-pack-prices-fall-to-108-per-kilowatt-hour",
+   "published": "2025-12-09",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-iihs-claims",
+   "title": "Waymos are way safer than human drivers, IIHS finds",
+   "publisher": "Claims Journal",
+   "url": "https://amp.claimsjournal.com/news/national/2026/07/23/339020.htm",
+   "published": "2026-07-23",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-waymo-evwire",
+   "title": "Waymo safety update: 220 million miles, 94 percent fewer crashes",
+   "publisher": "EV Wire",
+   "url": "https://evwire.com/p/waymo-safety-update-220-million-miles-94-percent-fewer-crashes",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-takeda-zaso",
+   "title": "U.S. FDA accepts NDA under Priority Review for zasocitinib",
+   "publisher": "Takeda",
+   "url": "https://www.takeda.com/newsroom/newsreleases/2026/fda-priority-review-zasocitinib-psoriasis/",
+   "published": "2026-09-14",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-insilico-newsmed",
+   "title": "Generative AI-driven drug rentosertib enters Phase III trial for IPF",
+   "publisher": "News-Medical",
+   "url": "https://www.news-medical.net/news/20260910/Generative-AI-driven-drug-Rentosertib-enters-Phase-III-trial-for-idiopathic-pulmonary-fibrosis.aspx",
+   "published": "2026-09-10",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-rtt-insilico",
+   "title": "Insilico Medicine doses first patient in GENESIS-IPF-3 Phase III",
+   "publisher": "RTTNews",
+   "url": "https://www.rttnews.com/3689895/insilico-medicine-doses-first-patient-in-genesis-ipf-3-phase-iii-trial.aspx",
+   "published": "2026-09",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-intuition-aidrugs",
+   "title": "AI-discovered drugs in clinical trials (2026)",
+   "publisher": "IntuitionLabs",
+   "url": "https://intuitionlabs.ai/articles/ai-discovered-drugs-clinical-trials-2026",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-ai2work-zero",
+   "title": "Why no AI-discovered drug has won FDA approval despite 200 trials",
+   "publisher": "ai2.work",
+   "url": "https://ai2.work/blog/why-no-ai-discovered-drug-has-won-fda-approval-despite-200-trials",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-pharmaphorum-intismeran",
+   "title": "MSD, Moderna skin cancer vaccine scores historic phase 3 win",
+   "publisher": "pharmaphorum",
+   "url": "https://pharmaphorum.com/news/msd-moderna-skin-cancer-vaccine-scores-historic-phase-3-win",
+   "published": "2026-08-19",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-compass-pr",
+   "title": "Compass Pathways completes COMP360 psilocybin NDA to US FDA",
+   "publisher": "Compass Pathways via Business Wire",
+   "url": "https://www.sttinfo.fi/tiedote/72486800/compass-pathways-completes-comp360-psilocybin-new-drug-application-to-us-fda-for-treatment-resistant-depression?publisherId=58763726",
+   "published": "2026-11-09",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-psychtimes-comp360",
+   "title": "NDA submission complete for COMP360 psilocybin",
+   "publisher": "Psychiatric Times",
+   "url": "https://www.psychiatrictimes.com/view/nda-submission-complete-comp360-psilocybin-for-treatment-resistant-depression",
+   "published": "2026-11-09",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-kai-eurekalert",
+   "title": "Conversational AI agent RCT (JAMA Network Open) news release",
+   "publisher": "EurekAlert!",
+   "url": "https://e3.eurekalert.org/news-releases/1128633",
+   "published": "2026-04-14",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-therabot-dartmouth",
+   "title": "Q&A with Nicholas Jacobson on the Therabot clinical trial",
+   "publisher": "The Dartmouth",
+   "url": "https://www.thedartmouth.com/article/2025/04/q-a-with-professor-nicholas-jacobson-who-conducted-a-clinical-trial-with-an-ai-based-psychotherapy-chatbot",
+   "published": "2025-04",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-medecon-scribes",
+   "title": "Take note: the AI scribe era is here",
+   "publisher": "Medical Economics",
+   "url": "https://www.medicaleconomics.com/view/take-note-the-ai-scribe-era-is-here",
+   "published": "2026-03-30",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-healio-scribes",
+   "title": "Oncologists give ambient AI scribes positive reviews",
+   "publisher": "Healio",
+   "url": "https://www.healio.com/news/hematology-oncology/20261027/an-exciting-time-oncologists-give-ambient-ai-scribes-positive-reviews",
+   "published": "2026-10-27",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-ukscribes",
+   "title": "AI scribes fail to note patient experiences, U.K. review finds",
+   "publisher": "Medical Economics",
+   "url": "https://www.medicaleconomics.com/view/ai-scribes-fail-to-note-patient-experiences-u-k-review-finds",
+   "published": "2026-09-04",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-beckers-galleri",
+   "title": "First multi-cancer blood test nears FDA approval: What to know",
+   "publisher": "Becker's Hospital Review",
+   "url": "https://www.beckershospitalreview.com/quality/public-health/first-multi-cancer-blood-test-nears-fda-approval-what-to-know/",
+   "published": "2026-10",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-npr-galleri",
+   "title": "A blood test that screens for multiple types of cancer? It may be available soon",
+   "publisher": "NPR (via WUNC)",
+   "url": "https://www.wunc.org/2026-06-22/a-blood-test-that-screens-for-multiple-types-of-cancer-it-may-be-available-soon",
+   "published": "2026-06-22",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-helion-bw",
+   "title": "Helion achieves new industry-first fusion energy milestones",
+   "publisher": "Helion via Business Wire",
+   "url": "https://www.businesswire.com/news/home/20260213457749/en/Helion-Achieves-New-Industry-First-Fusion-Energy-Milestones-Accelerating-Path-to-Commercial-Fusion",
+   "published": "2026-02-13",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-tc-helion",
+   "title": "Fusion startup Helion hits blistering temps as it races toward 2028 deadline",
+   "publisher": "TechCrunch",
+   "url": "https://techcrunch.com/2026/02/13/fusion-startup-helion-hits-blistering-temps-as-it-races-toward-2028-deadline/",
+   "published": "2026-02-13",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-carbondirect",
+   "title": "AI meets the grid: interconnection queue analysis in PJM and ERCOT",
+   "publisher": "Carbon Direct",
+   "url": "https://www.carbon-direct.com/research-and-reports/ai-meets-the-grid-interconnection-queue-analysis-in-pjm-and-ercot",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-networkworld-google",
+   "title": "Google warns transmission delays are now the biggest threat to data center expansion",
+   "publisher": "Network World",
+   "url": "https://www.networkworld.com/article/4117329/google-warns-transmission-delays-are-now-the-biggest-threat-to-data-center-expansion.html",
+   "published": "2026",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-stanford-canaries",
+   "title": "Canaries in the Coal Mine (August 2026 update)",
+   "publisher": "Stanford Digital Economy Lab",
+   "url": "https://digitaleconomy.stanford.edu/app/uploads/2026/08/Canaries_August2026.pdf",
+   "published": "2026-08",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-dallasfed",
+   "title": "Young Workers' Employment Drops in Occupations with High AI Exposure",
+   "publisher": "Federal Reserve Bank of Dallas",
+   "url": "https://www.frbsf.org/research-and-insights/publications/system-research-dallas-fed/2026/03/young-workers-employment-drops-occupations-high-ai-exposure/",
+   "published": "2026-03",
+   "accessed": "2026-11-14",
+   "type": "primary"
+  },
+  {
+   "id": "src-bgov-stlfed",
+   "title": "Weak Hiring Is Hurting Young Workers More than AI, Study Says",
+   "publisher": "Bloomberg Government",
+   "url": "https://news.bgov.com/daily-labor-report/weak-hiring-is-hurting-young-workers-more-than-ai-study-says",
+   "published": "2026-06-30",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-axios-prod",
+   "title": "Strong Q3 labor output shows a productivity surge",
+   "publisher": "Axios",
+   "url": "https://www.axios.com/2026/11/05/labor-output-productivity-ai",
+   "published": "2026-11-05",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-advisor-prod",
+   "title": "US labor productivity increases at fastest pace",
+   "publisher": "Advisor Perspectives",
+   "url": "https://www.advisorperspectives.com/articles/2026/11/05/us-labor-productivity-increases-fastest-pace",
+   "published": "2026-11-05",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  },
+  {
+   "id": "src-bigissue-ubi",
+   "title": "UK government unmoved on universal basic income pilot after Wales leads way",
+   "publisher": "Big Issue",
+   "url": "https://www.bigissue.com/news/employment/uk-government-unmoved-on-universal-basic-income-pilot-after-wales-leads-way/",
+   "published": "undated",
+   "accessed": "2026-11-14",
+   "type": "secondary"
+  }
+ ],
+ "changelog": [
+  {
+   "date": "2026-11-14",
+   "summary": "First run. Seeded 65 predictions across 10 domains, verified baseline metrics where possible, and graded first statuses. Research covered all 10 domains with 2+ searches each; status changes were checked against the underlying articles. Not verified this run: the seed's claimed METR ≥16h figure on a live METR page, and the seed's January 2026 UK-minister UBI remark (no source found). Domains with thin research this run: optical interconnects, AI chip design, gene editing, Alzheimer's, imaging. Next run should cover these.",
+   "status_changes": [
+    "pred-cars-2028-trucking pending → early (2 years early)",
+    "pred-ai-2028-month pending → on-track",
+    "pred-software-2028-github pending → on-track",
+    "pred-cars-2027-25cities pending → on-track",
+    "pred-cars-2028-safety pending → on-track",
+    "pred-medicine-2027-aidrug pending → on-track",
+    "pred-medicine-2030-mrna pending → on-track",
+    "pred-medicine-2030-rentosertib pending → on-track",
+    "pred-mh-2027-psilocybin pending → on-track",
+    "pred-computing-2027-dram pending → slipping",
+    "pred-computing-2028-pc pending → slipping",
+    "pred-energy-2028-grid pending → slipping"
+   ]
+  }
+ ]
+}
+</script>
+
+<script>
+(function(){
+"use strict";
+var D = JSON.parse(document.getElementById("hopecore-data").textContent);
+var app = document.getElementById("app");
+
+var STATUS = {
+  "confirmed":  {label:"Confirmed", icon:"✓"},
+  "early":      {label:"Early",     icon:"★"},
+  "on-track":   {label:"On track",  icon:"→"},
+  "pending":    {label:"Pending",   icon:"○"},
+  "slipping":   {label:"Slipping",  icon:"!"},
+  "missed":     {label:"Missed",    icon:"✕"},
+  "superseded": {label:"Superseded",icon:"–"}
+};
+var TREND = {"worsening":"↑ worsening","stable":"→ stable","easing":"↓ easing"};
+var DOMAINS = D.domains || [];
+var domName = {}; DOMAINS.forEach(function(d){ domName[d.id] = d.name; });
+
+// source index numbers follow ledger order
+var srcIndex = {}; D.sources.forEach(function(s,i){ srcIndex[s.id] = i+1; });
+
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];}); }
+function sup(ids){
+  if(!ids || !ids.length) return "";
+  return '<sup class="src">' + ids.map(function(id){
+    var s = D.sources.find(function(x){return x.id===id;});
+    if(!s) return "";
+    return '<a href="#'+esc(id)+'" title="'+esc(s.publisher+": "+s.title)+'">['+srcIndex[id]+']</a>';
+  }).join("") + '</sup>';
+}
+function chip(status){
+  var m = STATUS[status] || STATUS.pending;
+  return '<span class="chip" data-s="'+esc(status)+'"><span aria-hidden="true">'+m.icon+'</span>'+m.label+'</span>';
+}
+function parseDate(s){
+  if(!s) return NaN;
+  var p = String(s).split("-").map(Number);
+  return Date.UTC(p[0], (p[1]||7)-1, p[2]||(p[1]?15:1));
+}
+function fmtDate(s){
+  if(!s) return "";
+  var p = String(s).split("-");
+  var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  if(p.length===1) return p[0];
+  if(p.length===2) return M[+p[1]-1]+" "+p[0];
+  return M[+p[1]-1]+" "+(+p[2])+", "+p[0];
+}
+function fmtNum(v){
+  var a = Math.abs(v);
+  if(a>=10000) return Math.round(v/1000).toLocaleString("en-US")+"k";
+  if(a>=100) return Math.round(v).toLocaleString("en-US");
+  if(a>=10) return (Math.round(v*10)/10).toString();
+  return (Math.round(v*100)/100).toString();
+}
+function unitStr(v,u){
+  var n = fmtNum(v);
+  if(u==="%") return n+"%";
+  if(u==="x") return n+"×";
+  if(u==="$/kWh") return "$"+n+"/kWh";
+  if(u==="index") return n;
+  return n+" "+u;
+}
+
+var year0 = Number(D.meta.last_run.slice(0,4));
+var preds = D.predictions;
+function count(st, list){ return (list||preds).filter(function(p){return p.status===st;}).length; }
+
+// ---------- HERO ----------
+var html = '';
+html += '<header class="hero"><div class="kicker">Hope grounded in evidence</div>'
+  + '<h1>Hopecore: AI progress tracker, YTD → 2040</h1>'
+  + '<p class="lede">'+esc(D.meta.summary)+sup(D.meta.summary_source_ids)+'</p>'
+  + '<div class="meta num">Last updated: <strong>'+esc(D.meta.last_run)+'</strong> · Run #'+D.meta.run_count
+  + ' · '+preds.length+' predictions · '+D.milestones.length+' milestones · '+D.sources.length+' sources</div></header>';
+
+// ---------- SCORECARD ----------
+var due = preds.filter(function(p){ return p.year <= year0 || p.status==="early" || p.status==="confirmed" || p.status==="missed"; });
+var hits = count("confirmed",due)+count("early",due), misses = count("missed",due);
+var hitRate = (hits+misses) ? Math.round(100*hits/(hits+misses))+"%" : "—";
+var newMs = D.milestones.filter(function(m){ return m.added===D.meta.last_run; }).length;
+html += '<section aria-labelledby="sc"><h2 id="sc">Scorecard</h2><p class="sec-sub">Hit rate = (confirmed + early) ÷ (confirmed + early + missed), among predictions that are resolved or whose target year has arrived.</p><div class="tiles">';
+[["confirmed","Confirmed"],["early","Early"],["on-track","On track"],["slipping","Slipping"],["missed","Missed"],["pending","Pending"]].forEach(function(t){
+  html += '<div class="tile" data-s="'+t[0]+'"><div class="v">'+count(t[0])+'</div><div class="l"><span aria-hidden="true">'+STATUS[t[0]].icon+'</span> '+t[1]+'</div></div>';
+});
+html += '<div class="tile"><div class="v">'+hitRate+'</div><div class="l">Hit rate'+(hits+misses?' ('+hits+'/'+(hits+misses)+')':' (none resolved by deadline yet)')+'</div></div>';
+html += '<div class="tile"><div class="v">'+newMs+'</div><div class="l">New milestones this run</div></div>';
+html += '</div></section>';
+
+// ---------- METRICS ----------
+function chart(m){
+  var W=300,H=110,pl=4,pr=4,pt=8,pb=18;
+  var s = m.series.slice().sort(function(a,b){return parseDate(a.date)-parseDate(b.date);});
+  var xs = s.map(function(p){return parseDate(p.date);}), ys = s.map(function(p){return p.value;});
+  var lg = !!m.log;
+  var f = lg ? function(v){return Math.log10(v);} : function(v){return v;};
+  var ymin = Math.min.apply(null, ys.map(f)), ymax = Math.max.apply(null, ys.map(f));
+  if(!lg){ ymin = Math.min(0, ymin); }
+  if(ymax===ymin){ ymax = ymin + (lg?1:Math.abs(ymin)||1); }
+  var pad=(ymax-ymin)*0.08; ymax+=pad; if(lg) ymin-=pad;
+  var xmin = Math.min.apply(null,xs), xmax = Math.max.apply(null,xs);
+  if(xmax===xmin){ xmin-=86400000*60; xmax+=86400000*60; }
+  function X(t){ return pl + (t-xmin)/(xmax-xmin)*(W-pl-pr); }
+  function Y(v){ return pt + (1-(f(v)-ymin)/(ymax-ymin))*(H-pt-pb); }
+  var o = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(m.name)+' over time'+(lg?' (log scale)':'')+'">';
+  o += '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+(H-pb)+'" y2="'+(H-pb)+'" stroke="var(--grid)"/>';
+  o += '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+pt+'" y2="'+pt+'" stroke="var(--grid)" stroke-dasharray="2 3"/>';
+  if(s.length>1){
+    o += '<polyline fill="none" stroke="var(--chart)" stroke-width="2" stroke-linejoin="round" points="'+s.map(function(p){return X(parseDate(p.date)).toFixed(1)+","+Y(p.value).toFixed(1);}).join(" ")+'"/>';
+  }
+  s.forEach(function(p,i){
+    var x=X(parseDate(p.date)), y=Y(p.value);
+    o += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(i===s.length-1?4:3)+'" fill="'+(i===s.length-1?'var(--chart)':'var(--surface)')+'" stroke="var(--chart)" stroke-width="2"><title>'+esc(fmtDate(p.date)+": "+unitStr(p.value,m.unit)+(p.note?" — "+p.note:""))+'</title></circle>';
+  });
+  o += '<text x="'+pl+'" y="'+(H-4)+'" font-size="10" fill="var(--muted)" font-family="system-ui,sans-serif">'+esc(fmtDate(s[0].date))+'</text>';
+  if(s.length>1) o += '<text x="'+(W-pr)+'" y="'+(H-4)+'" font-size="10" fill="var(--muted)" text-anchor="end" font-family="system-ui,sans-serif">'+esc(fmtDate(s[s.length-1].date))+'</text>';
+  if(lg) o += '<text x="'+(W/2)+'" y="'+(H-4)+'" font-size="10" fill="var(--muted)" text-anchor="middle" font-family="system-ui,sans-serif">log scale</text>';
+  o += '</svg>';
+  return o;
+}
+html += '<section aria-labelledby="hm"><h2 id="hm">Headline metrics</h2><p class="sec-sub">Hover or tap points for notes. Where sources disagree, the more conservative number is charted.</p><div class="charts">';
+D.metrics.forEach(function(m){
+  var s = m.series.slice().sort(function(a,b){return parseDate(a.date)-parseDate(b.date);});
+  var last = s[s.length-1], prev = s.length>1 ? s[s.length-2] : null;
+  var delta = prev ? (last.value-prev.value) : null;
+  var dtxt = prev ? ((delta>=0?"+":"−")+fmtNum(Math.abs(delta))+(m.unit==="%"?" pts":"")+" since "+fmtDate(prev.date)) : "first data point";
+  var allSrc = []; s.forEach(function(p){ p.source_ids.forEach(function(id){ if(allSrc.indexOf(id)<0) allSrc.push(id); }); });
+  html += '<div class="card chart-card"><span class="dom-tag">'+esc(domName[m.domain]||m.domain)+'</span><p class="name">'+esc(m.name)+'</p>'
+    + '<div class="top"><span class="big">'+esc(unitStr(last.value,m.unit))+'</span><span class="delta num">'+esc(dtxt)+'</span></div>'
+    + chart(m) + '<div class="note">'+esc(m.trend_note)+sup(allSrc)+'</div>'
+    + (last.note?'<div class="note" style="margin-top:4px"><em>Latest: '+esc(last.note)+'</em></div>':'')
+    + '</div>';
+});
+html += '</div></section>';
+
+// ---------- TIMELINE ----------
+function predDetails(p, showDomain){
+  var hist = p.history.slice().reverse().map(function(h){
+    return '<li><span class="num">'+esc(h.date)+'</span> · '+chip(h.status)+' '+esc(h.reason)+sup(h.source_ids)+'</li>';
+  }).join("");
+  return '<details class="pred '+esc(p.status)+'" data-domain="'+esc(p.domain)+'"><summary>'+chip(p.status)
+    + '<span class="conf">'+esc(p.confidence)+' confidence'+(p.years_early?' · '+p.years_early+' yr early':'')+'</span>'
+    + (showDomain?' <span class="dom-tag">'+esc(domName[p.domain]||p.domain)+'</span>':'')
+    + '<span class="ptext">'+esc(p.text)+'</span></summary>'
+    + '<div class="sans" style="font-size:12px;color:var(--muted);margin-top:6px">Target '+p.year+' · kind: '+esc(p.kind)+' · origin: '+esc(p.origin)+(p.revises?' · revises '+esc(p.revises):'')+'</div>'
+    + '<ul class="phist">'+hist+'</ul></details>';
+}
+var lastYear = 2040;
+html += '<section aria-labelledby="tl"><h2 id="tl">The 2040 timeline</h2><p class="sec-sub">Scroll sideways. Tap a prediction to see its grading history and sources.</p>';
+html += '<div class="filters" role="group" aria-label="Filter by domain"><button type="button" data-f="all" aria-pressed="true">All</button>'
+  + DOMAINS.map(function(d){ return '<button type="button" data-f="'+esc(d.id)+'" aria-pressed="false">'+esc(d.name.split(" & ")[0].split(" (")[0])+'</button>'; }).join("") + '</div>';
+html += '<div class="timeline" id="timeline">';
+for(var y=year0; y<=lastYear; y++){
+  var ps = preds.filter(function(p){return p.year===y;});
+  html += '<div class="year'+(y===year0?' now':'')+'"><h3>'+y+'<small>'+(y===year0?'now':ps.length+' prediction'+(ps.length===1?'':'s'))+'</small></h3>';
+  html += ps.length ? ps.map(function(p){return predDetails(p,true);}).join("") : '<p class="empty" style="font-size:13px">No predictions due.</p>';
+  html += '</div>';
+}
+html += '</div></section>';
+
+// ---------- DOMAIN CARDS ----------
+html += '<section aria-labelledby="dc"><h2 id="dc">Domains</h2><p class="sec-sub">Each card shows wins and roadblocks side by side. Labels: capability = it can be done, deployment = in real use, impact = measurably changed outcomes.</p><div class="domains">';
+DOMAINS.forEach(function(d){
+  var ms = D.milestones.filter(function(m){return m.domain===d.id;}).sort(function(a,b){return parseDate(b.date)-parseDate(a.date);});
+  var dp = preds.filter(function(p){return p.domain===d.id;}).sort(function(a,b){return a.year-b.year;});
+  var rbs = D.roadblocks.filter(function(r){return r.domain===d.id;});
+  var sevOrder = {high:0,medium:1,low:2}; rbs.sort(function(a,b){return sevOrder[a.severity]-sevOrder[b.severity];});
+  function msLi(m){
+    return '<li><div class="d">'+esc(fmtDate(m.date))+'<span class="badge">'+esc(m.kind)+'</span><span class="badge'+(m.significance==="first-ever"?' first':'')+'">'+esc(m.significance)+'</span></div>'
+      + '<div class="t">'+esc(m.title)+sup(m.source_ids)+'</div><p class="s">'+esc(m.summary)+'</p></li>';
+  }
+  var counts = ["early","confirmed","on-track","slipping","missed"].filter(function(s){return count(s,dp);}).map(function(s){return '<span class="chip" data-s="'+s+'"><span aria-hidden="true">'+STATUS[s].icon+'</span>'+count(s,dp)+' '+STATUS[s].label.toLowerCase()+'</span>';}).join("");
+  html += '<article class="card domain" id="d-'+esc(d.id)+'"><h2>'+esc(d.name)+'</h2><div class="counts">'+counts+'</div>';
+  html += '<h3>Realistic read</h3><p class="read">'+esc(d.read)+'</p>';
+  html += '<h3>Latest milestones</h3>' + (ms.length ? '<ul class="ms">'+ms.slice(0,5).map(msLi).join("")+'</ul>' + (ms.length>5?'<details class="more"><summary>Show '+(ms.length-5)+' more</summary><ul class="ms">'+ms.slice(5).map(msLi).join("")+'</ul></details>':'') : '<p class="empty">No milestones recorded yet.</p>');
+  html += '<h3>Roadblocks</h3><div class="roadblocks">' + (rbs.length ? rbs.map(function(r){
+    return '<div class="rb" data-sev="'+esc(r.severity)+'"><span class="sev">'+esc(r.severity)+'</span><span class="rt">'+esc(r.title)+sup(r.source_ids)+' <span class="tr">'+esc(TREND[r.trend]||r.trend)+'</span></span><span class="rs">'+esc(r.summary)+'</span></div>';
+  }).join("") : '<p class="empty">No roadblocks recorded.</p>') + '</div>';
+  html += '<h3>Predictions</h3>' + dp.map(function(p){ return predDetails(p,false).replace('<span class="conf">','<span class="conf"><strong class="num">'+p.year+'</strong> · '); }).join("");
+  html += '</article>';
+});
+html += '</div></section>';
+
+// ---------- PROVED WALL ----------
+var proved = preds.filter(function(p){return p.status==="confirmed"||p.status==="early";});
+html += '<section aria-labelledby="pw"><h2 id="pw">The news proved it</h2><p class="sec-sub">Predictions that came true, with the evidence that settled them.</p>';
+if(proved.length){
+  html += '<div class="proved">' + proved.map(function(p){
+    var h = p.history.filter(function(x){return x.status===p.status;}).slice(-1)[0] || p.history[p.history.length-1];
+    var ms = D.milestones.filter(function(m){return (m.confirms_prediction_ids||[]).indexOf(p.id)>=0;});
+    return '<div class="card fade">'+chip(p.status)+' <span class="yrs">'+(p.status==="early"&&p.years_early?p.years_early+' year'+(p.years_early>1?'s':'')+' early':'on time')+'</span>'
+      + '<p class="pt">'+esc(p.text)+'</p>'
+      + '<p class="sans" style="font-size:13px;color:var(--muted);margin:0 0 6px">Predicted for '+p.year+' · graded '+esc(h.date)+'</p>'
+      + ms.map(function(m){return '<p style="margin:0 0 6px"><strong>'+esc(fmtDate(m.date))+':</strong> '+esc(m.title)+sup(m.source_ids)+'</p>';}).join("")
+      + '<p style="font-size:14px;margin:0">'+esc(h.reason)+sup(h.source_ids)+'</p></div>';
+  }).join("") + '</div>';
+} else { html += '<p class="empty">Nothing confirmed yet. Check back.</p>'; }
+html += '</section>';
+
+// ---------- REALITY CHECK ----------
+var bigRb = D.roadblocks.filter(function(r){return r.severity==="high" || r.trend==="worsening";});
+var lastLog = D.changelog[D.changelog.length-1];
+var bad = preds.filter(function(p){
+  return (p.status==="slipping"||p.status==="missed") && p.history.some(function(h){return h.date===D.meta.last_run && (h.status==="slipping"||h.status==="missed");});
+});
+html += '<section aria-labelledby="rc"><h2 id="rc">Reality check</h2><p class="sec-sub">The biggest headwinds right now, and predictions that slipped or were missed this run.</p><div class="reality">';
+html += '<div class="card"><h3>Biggest roadblocks (high severity or worsening)</h3><div class="roadblocks" style="background:none;padding:0">' + bigRb.map(function(r){
+  return '<div class="rb" data-sev="'+esc(r.severity)+'"><span class="sev">'+esc(r.severity)+'</span><span class="rt">'+esc(r.title)+sup(r.source_ids)+' <span class="tr">'+esc(TREND[r.trend])+'</span></span><span class="rs"><span class="dom-tag">'+esc(domName[r.domain])+'</span> · '+esc(r.summary)+'</span></div>';
+}).join("") + '</div></div>';
+html += '<div class="card"><h3>Slipped or missed this run</h3>' + (bad.length ? bad.map(function(p){return predDetails(p,true);}).join("") : '<p class="empty">None.</p>') + '</div>';
+html += '</div></section>';
+
+// ---------- CHANGELOG ----------
+html += '<section class="changelog" aria-labelledby="cl"><h2 id="cl">Changelog</h2>';
+D.changelog.slice().reverse().forEach(function(c,i){
+  html += '<details'+(i===0?' open':'')+'><summary class="num">'+esc(c.date)+' — '+c.status_changes.length+' status change'+(c.status_changes.length===1?'':'s')+'</summary><p>'+esc(c.summary)+'</p>'
+    + (c.status_changes.length?'<ul>'+c.status_changes.map(function(s){return '<li>'+esc(s)+'</li>';}).join("")+'</ul>':'') + '</details>';
+});
+html += '</section>';
+
+// ---------- FOOTER ----------
+html += '<footer><h2>Method</h2>'
+  + '<p>Every prediction has one status: <strong>confirmed</strong> (happened as stated by the target year), <strong>early</strong> (confirmed before it), <strong>on track</strong> (measured progress at the needed pace), <strong>pending</strong> (not enough evidence), <strong>slipping</strong> (real but behind pace), <strong>missed</strong> (target year passed) or <strong>superseded</strong> (the question stopped making sense). Announcements, plans and targets never count as confirmation. Confirmed or missed needs one primary source or two independent secondary sources. Predictions are never deleted or reworded; revisions are added as new entries. Confidence is the tracker\'s current judgment that the prediction will be met by its target year.</p>'
+  + '<div class="disclaimer"><strong>Not financial or medical advice.</strong> Drug and device statuses are reported as regulators state them; nothing listed as investigational or pending is available as an approved treatment. Talk to a clinician about any medical decision.</div>'
+  + '<h2>Sources</h2><ol>' + D.sources.map(function(s){
+    return '<li id="'+esc(s.id)+'">'+esc(s.publisher)+'. <a href="'+esc(s.url)+'" rel="noopener noreferrer">'+esc(s.title)+'</a>. Published '+esc(s.published)+', accessed '+esc(s.accessed)+'. <span class="badge">'+esc(s.type)+'</span></li>';
+  }).join("") + '</ol>'
+  + '<p class="meta">Rendered entirely from the ledger embedded in this file. Run #'+D.meta.run_count+', created '+esc(D.meta.created)+'.</p></footer>';
+
+app.innerHTML = html;
+
+// domain filter for timeline
+var btns = app.querySelectorAll(".filters button");
+btns.forEach(function(b){
+  b.addEventListener("click", function(){
+    var f = b.getAttribute("data-f");
+    btns.forEach(function(x){ x.setAttribute("aria-pressed", String(x===b)); });
+    app.querySelectorAll("#timeline details.pred").forEach(function(el){
+      el.hidden = !(f==="all" || el.getAttribute("data-domain")===f);
+    });
+  });
+});
+})();
+</script>
+</body>
+</html>
