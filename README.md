@@ -13,4 +13,6 @@ open your favorite agent and say "read generate-hopecore.md and update relevant 
 
 ok :)
 
-[./hopecore.html](./hopecore.html)
+live: [meltingscales.github.io/hopecore/hopecore.html](https://meltingscales.github.io/hopecore/hopecore.html)
+
+source: [./hopecore.html](./hopecore.html)
