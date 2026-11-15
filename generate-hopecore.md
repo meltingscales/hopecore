@@ -8,6 +8,8 @@ Hopecore means **hope grounded in evidence**. The dashboard should make a reader
 
 ## 0. Run summary (do this every time)
 
+**Hard requirement: at most one run per calendar month.** Before doing anything else, read `meta.last_run` from the ledger. If it falls in the current calendar month, stop: don't research, don't edit `hopecore.html`, and tell the user the date the next run is allowed (the 1st of next month). The only exception is when the user explicitly asks in this session for an extra run or a fix. `python3 tools/hopecore.py check` enforces this by failing when the ledger changed but `meta.last_run` is in the same month as the last committed run.
+
 1. **Load state.** If `hopecore.html` exists, parse the JSON inside `<script type="application/json" id="hopecore-data">`. That is the ledger. If the file doesn't exist, start from the seed ledger in section 7.
 2. **Research.** Search the news for every domain in section 2 (section 3 covers how).
 3. **Update the ledger.** Add new evidence, re-grade predictions, add new milestones and roadblocks, and update the baseline metrics (sections 4–5).
@@ -336,4 +338,4 @@ Run `python3 tools/hopecore.py check` first. It covers the mechanical items belo
 
 ## 9. Suggested schedule
 
-Run weekly (for example, every Monday). Run monthly at minimum. Each run should be cheap when little changed: if a domain has no meaningful news, record "no material change" for it in the changelog and leave it alone.
+Run once a month, early in the month (for example, the first Monday). Never more than once per calendar month (see section 0). Each run should be cheap when little changed: if a domain has no meaningful news, record "no material change" for it in the changelog and leave it alone.

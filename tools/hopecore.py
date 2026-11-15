@@ -305,6 +305,10 @@ def cmd_check(args):
         if len(L["changelog"]) < len(old["changelog"]) or L["changelog"][: len(old["changelog"])] != old["changelog"]:
             err("changelog: earlier entries were edited or removed")
         if L != old:
+            if meta["last_run"][:7] == old["meta"]["last_run"][:7]:
+                err(f"monthly limit: ledger changed but meta.last_run ({meta['last_run']}) is in the same month as the "
+                    f"last committed run ({old['meta']['last_run']}). Only one run per calendar month; next run allowed "
+                    f"from the 1st of next month unless the user explicitly asks for an extra run.")
             if meta["run_count"] <= old["meta"]["run_count"]:
                 err(f"meta.run_count not incremented (was {old['meta']['run_count']}, now {meta['run_count']})")
             if meta["last_run"] <= old["meta"]["last_run"] and meta["run_count"] != old["meta"]["run_count"]:
