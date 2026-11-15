@@ -17,6 +17,19 @@ Hopecore means **hope grounded in evidence**. The dashboard should make a reader
 
 Never delete history. Predictions can change status, but their original text, original target date and grading history stay in the ledger.
 
+### Tools
+
+`tools/hopecore.py` (Python 3, standard library only) handles the ledger so you don't have to edit JSON inside HTML by hand. `hopecore.html` is the only source of truth: its renderer (CSS and JS) and the ledger both live in it.
+
+| Command | What it does |
+|---|---|
+| `python3 tools/hopecore.py extract -o ledger.json` | Write the embedded ledger to a JSON file (omit `-o` to print it). |
+| `python3 tools/hopecore.py embed ledger.json` | Put an edited ledger back into `hopecore.html`, escaped and round-trip verified. |
+| `python3 tools/hopecore.py check` | Run the section 8 self-check. It validates the schema, enum values and dates, checks that every source reference resolves and that `confirmed`/`early`/`missed` meet the source rule, and compares against the last commit (`--against REF`, default `HEAD`) so no prediction, milestone, roadblock or changelog entry was deleted or reworded and `run_count` went up. Exits non-zero on failure. |
+| `python3 tools/hopecore.py stats` | Print scorecard counts, overall and per domain. |
+
+A typical run: `extract` to a scratch file, edit the JSON, `embed`, edit `hopecore.html`'s renderer only if the layout needs to change, then `check` until it prints `OK`. Keep the ledger file out of the repo. Change the tool when the spec changes, and keep it dependency-free.
+
 ---
 
 ## 1. Principles
@@ -306,6 +319,8 @@ Use these as the starting predictions (`origin: "seed"`, `status: "pending"` unl
 ---
 
 ## 8. Self-check before finishing
+
+Run `python3 tools/hopecore.py check` first. It covers the mechanical items below (parsing, deletions, wording, sources, roadblock panels, changelog, run counter, scorecard counts). The rest (announcements, quotes, 375px, dark mode, console errors) still need your own review.
 
 - [ ] The ledger JSON parses and contains every prediction from the previous run (none deleted, wording unchanged).
 - [ ] Every status change has a reason, a date and at least one source; `confirmed`/`missed` meet the primary-or-two-secondary rule.
