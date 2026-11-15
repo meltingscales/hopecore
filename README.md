@@ -16,3 +16,9 @@ ok :)
 live: [meltingscales.github.io/hopecore/hopecore.html](https://meltingscales.github.io/hopecore/hopecore.html)
 
 source: [./hopecore.html](./hopecore.html)
+
+## scheduled task
+
+only for me :) no snooping
+
+<https://claude.ai/scheduled-task/trig_015kD6oB3YnFKbV118DpbPuC>
