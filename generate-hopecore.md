@@ -82,6 +82,17 @@ You may add a domain if the news clearly demands one. Record why in the changelo
 
 The ledger is one JSON object embedded in the HTML. Keep it valid JSON and keep its keys stable across runs.
 
+Beyond the core schema below, the renderer in `hopecore.html` also reads these fields. Keep them on every run:
+
+- `meta.summary` (string) and `meta.summary_source_ids` (array): the hero's one-sentence "state of the future", rewritten each run.
+- `domains` (top-level array of `{ "id", "name", "read" }`): one entry per domain in section 2. `read` is the domain card's "realistic read" paragraph, rewritten each run. A domain missing here gets no card.
+- `metrics[].log` (optional `true`): draw that chart on a log scale.
+- `milestones[].added` (date): the run that added it. The "new milestones" tile counts entries where this equals `meta.last_run`.
+- `predictions[].years_early` (integer): required when `status` is `early`.
+- `predictions[].revises` (prediction id): set on `origin: "revised"` predictions to link the original.
+
+Dates may be `YYYY`, `YYYY-MM` or `YYYY-MM-DD` when the source gives no exact day. Never invent a day.
+
 ```json
 {
   "meta": {
