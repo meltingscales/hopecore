@@ -53,6 +53,9 @@ sup.src a{text-decoration:none;padding:0 1px}
 .chart-card .name{font-size:14px;font-weight:600;font-family:ui-sans-serif,system-ui,sans-serif;margin:0 0 4px}
 .chart-card svg{width:100%;height:auto;display:block;margin:6px 0}
 .chart-card .note{font-size:13px;color:var(--muted)}
+.chart-card .pt{cursor:pointer;outline:none}
+.chart-card .pt:focus-visible circle:last-child{stroke-width:3;stroke:var(--text)}
+.tip{position:fixed;z-index:10;max-width:260px;padding:6px 9px;border-radius:6px;background:var(--text);color:var(--bg);font:12px/1.4 ui-sans-serif,system-ui,sans-serif;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .dom-tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:ui-sans-serif,system-ui,sans-serif}
 .chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--sc);color:var(--sc);background:color-mix(in srgb,var(--sc) 10%,transparent);white-space:nowrap}
 [data-s="confirmed"]{--sc:var(--s-confirmed)}[data-s="early"]{--sc:var(--s-early)}[data-s="on-track"]{--sc:var(--s-on-track)}[data-s="pending"]{--sc:var(--s-pending)}[data-s="slipping"]{--sc:var(--s-slipping)}[data-s="missed"]{--sc:var(--s-missed)}[data-s="superseded"]{--sc:var(--s-superseded)}
@@ -2928,8 +2931,23 @@ html += '<div class="tile"><div class="v">'+newMs+'</div><div class="l">New mile
 html += '</div></section>';
 
 // ---------- METRICS ----------
+function ticks(lo, hi, lg){
+  // lo/hi are in plotted units (log10 when lg). Returns values in data units.
+  var out = [];
+  if(lg){
+    for(var k=Math.floor(lo); k<=Math.ceil(hi); k++){
+      [1,2,5].forEach(function(m){ var v=m*Math.pow(10,k), l=Math.log10(v); if(l>=lo-1e-9 && l<=hi+1e-9) out.push(v); });
+    }
+    if(out.length>4) out = out.filter(function(v){ return Math.abs(Math.log10(v)%1)<1e-9; });
+    return out;
+  }
+  var raw = (hi-lo)/4, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw/mag;
+  var step = (r<=1?1:r<=2?2:r<=2.5?2.5:r<=5?5:10)*mag;
+  for(var v=Math.ceil(lo/step)*step; v<=hi+step*1e-9; v+=step) out.push(Math.round(v/step)*step);
+  return out;
+}
 function chart(m){
-  var W=300,H=110,pl=4,pr=4,pt=8,pb=18;
+  var W=300,H=120,pl=34,pr=6,pt=8,pb=18;
   var s = m.series.slice().sort(function(a,b){return parseDate(a.date)-parseDate(b.date);});
   var xs = s.map(function(p){return parseDate(p.date);}), ys = s.map(function(p){return p.value;});
   var lg = !!m.log;
@@ -2942,23 +2960,31 @@ function chart(m){
   if(xmax===xmin){ xmin-=86400000*60; xmax+=86400000*60; }
   function X(t){ return pl + (t-xmin)/(xmax-xmin)*(W-pl-pr); }
   function Y(v){ return pt + (1-(f(v)-ymin)/(ymax-ymin))*(H-pt-pb); }
-  var o = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(m.name)+' over time'+(lg?' (log scale)':'')+'">';
+  var font = ' font-size="10" fill="var(--muted)" font-family="system-ui,sans-serif"';
+  var o = '<svg viewBox="0 0 '+W+' '+H+'" role="group" aria-label="'+esc(m.name)+' over time'+(lg?' (log scale)':'')+'">';
+  ticks(ymin, ymax, lg).forEach(function(v){
+    var y = Y(v).toFixed(1);
+    o += '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y+'" y2="'+y+'" stroke="var(--grid)"'+(v===0?'':' stroke-dasharray="2 3"')+'/>';
+    o += '<text x="'+(pl-5)+'" y="'+y+'" dy="3.5" text-anchor="end"'+font+'>'+esc(fmtNum(v))+'</text>';
+  });
   o += '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+(H-pb)+'" y2="'+(H-pb)+'" stroke="var(--grid)"/>';
-  o += '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+pt+'" y2="'+pt+'" stroke="var(--grid)" stroke-dasharray="2 3"/>';
   if(s.length>1){
     o += '<polyline fill="none" stroke="var(--chart)" stroke-width="2" stroke-linejoin="round" points="'+s.map(function(p){return X(parseDate(p.date)).toFixed(1)+","+Y(p.value).toFixed(1);}).join(" ")+'"/>';
   }
   s.forEach(function(p,i){
-    var x=X(parseDate(p.date)), y=Y(p.value);
-    o += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(i===s.length-1?4:3)+'" fill="'+(i===s.length-1?'var(--chart)':'var(--surface)')+'" stroke="var(--chart)" stroke-width="2"><title>'+esc(fmtDate(p.date)+": "+unitStr(p.value,m.unit)+(p.note?" — "+p.note:""))+'</title></circle>';
+    var x=X(parseDate(p.date)).toFixed(1), y=Y(p.value).toFixed(1), last=i===s.length-1;
+    var tip = fmtDate(p.date)+": "+unitStr(p.value,m.unit)+(p.note?" — "+p.note:"");
+    o += '<g class="pt" tabindex="0" role="img" aria-label="'+esc(tip)+'" data-tip="'+esc(tip)+'">'
+      + '<circle cx="'+x+'" cy="'+y+'" r="11" fill="transparent"/>'
+      + '<circle cx="'+x+'" cy="'+y+'" r="'+(last?4:3)+'" fill="'+(last?'var(--chart)':'var(--surface)')+'" stroke="var(--chart)" stroke-width="2"/></g>';
   });
-  o += '<text x="'+pl+'" y="'+(H-4)+'" font-size="10" fill="var(--muted)" font-family="system-ui,sans-serif">'+esc(fmtDate(s[0].date))+'</text>';
-  if(s.length>1) o += '<text x="'+(W-pr)+'" y="'+(H-4)+'" font-size="10" fill="var(--muted)" text-anchor="end" font-family="system-ui,sans-serif">'+esc(fmtDate(s[s.length-1].date))+'</text>';
-  if(lg) o += '<text x="'+(W/2)+'" y="'+(H-4)+'" font-size="10" fill="var(--muted)" text-anchor="middle" font-family="system-ui,sans-serif">log scale</text>';
+  o += '<text x="'+pl+'" y="'+(H-4)+'"'+font+'>'+esc(fmtDate(s[0].date))+'</text>';
+  if(s.length>1) o += '<text x="'+(W-pr)+'" y="'+(H-4)+'" text-anchor="end"'+font+'>'+esc(fmtDate(s[s.length-1].date))+'</text>';
+  if(lg) o += '<text x="'+((W+pl)/2)+'" y="'+(H-4)+'" text-anchor="middle"'+font+'>log scale</text>';
   o += '</svg>';
   return o;
 }
-html += '<section aria-labelledby="hm"><h2 id="hm">Headline metrics</h2><p class="sec-sub">Hover or tap points for notes. Where sources disagree, the more conservative number is charted.</p><div class="charts">';
+html += '<section aria-labelledby="hm"><h2 id="hm">Headline metrics</h2><p class="sec-sub">Hover, tap or tab to points for notes. Where sources disagree, the more conservative number is charted.</p><div class="charts">';
 D.metrics.forEach(function(m){
   var s = m.series.slice().sort(function(a,b){return parseDate(a.date)-parseDate(b.date);});
   var last = s[s.length-1], prev = s.length>1 ? s[s.length-2] : null;
@@ -3069,6 +3095,30 @@ html += '<footer><h2>Method</h2>'
   + '<p class="meta">Source code: <a href="https://github.com/meltingscales/hopecore" rel="noopener noreferrer">github.com/meltingscales/hopecore</a></p></footer>';
 
 app.innerHTML = html;
+
+// chart point tooltips: hover, tap and keyboard focus
+var tip = document.createElement("div");
+tip.className = "tip"; tip.setAttribute("role","tooltip"); tip.hidden = true;
+document.body.appendChild(tip);
+var tipFor = null;
+function showTip(g){
+  tipFor = g; tip.textContent = g.getAttribute("data-tip"); tip.hidden = false;
+  var r = g.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  var x = Math.max(8, Math.min(window.innerWidth-w-8, r.left+r.width/2-w/2));
+  var y = r.top-h-6 < 8 ? r.bottom+6 : r.top-h-6;
+  tip.style.left = x+"px"; tip.style.top = y+"px";
+}
+function hideTip(){ tipFor = null; tip.hidden = true; }
+app.querySelectorAll(".chart-card .pt").forEach(function(g){
+  g.addEventListener("pointerenter", function(){ showTip(g); });
+  g.addEventListener("pointerleave", function(e){ if(e.pointerType==="mouse") hideTip(); });
+  g.addEventListener("focus", function(){ showTip(g); });
+  g.addEventListener("blur", hideTip);
+  g.addEventListener("click", function(e){ e.stopPropagation(); showTip(g); });
+});
+document.addEventListener("click", function(){ if(tipFor) hideTip(); });
+document.addEventListener("keydown", function(e){ if(e.key==="Escape") hideTip(); });
+window.addEventListener("scroll", hideTip, {passive:true});
 
 // domain filter for timeline
 var btns = app.querySelectorAll(".filters button");
