@@ -3065,7 +3065,8 @@ html += '<footer><h2>Method</h2>'
   + '<h2>Sources</h2><ol>' + D.sources.map(function(s){
     return '<li id="'+esc(s.id)+'">'+esc(s.publisher)+'. <a href="'+esc(s.url)+'" rel="noopener noreferrer">'+esc(s.title)+'</a>. Published '+esc(s.published)+', accessed '+esc(s.accessed)+'. <span class="badge">'+esc(s.type)+'</span></li>';
   }).join("") + '</ol>'
-  + '<p class="meta">Rendered entirely from the ledger embedded in this file. Run #'+D.meta.run_count+', created '+esc(D.meta.created)+'.</p></footer>';
+  + '<p class="meta">Rendered entirely from the ledger embedded in this file. Run #'+D.meta.run_count+', created '+esc(D.meta.created)+'.</p>'
+  + '<p class="meta">Source code: <a href="https://github.com/meltingscales/hopecore" rel="noopener noreferrer">github.com/meltingscales/hopecore</a></p></footer>';
 
 app.innerHTML = html;
 
