@@ -52,7 +52,7 @@ Track all of these. Each domain has a stable `id`, used in the ledger.
 
 | id | Domain | What to watch |
 |---|---|---|
-| `ai` | AI capabilities & self-improvement | METR time horizons, AI R&D speedup reports, lab reports, major model releases, benchmark saturation |
+| `ai` | AI capabilities & self-improvement | METR time horizons, AI R&D speedup reports, lab reports, major model releases, benchmark saturation, alternative architectures and training objectives (Next-Concept Modeling and other concept-level prediction, Kolmogorov–Arnold Networks, state-space models, liquid networks) |
 | `computing` | Computing & hardware | Data center power (GW), chip and memory supply, DRAM/HBM prices, consumer PC/GPU prices, new chip architectures, optical interconnects, quantum |
 | `software` | Software & open source | Share of code written by AI, autonomous agent projects, formally verified software, AI maintenance of open source |
 | `robotics` | Robotics | Humanoid deployments (verified unit counts), robot prices, home robots, factory automation, agriculture, surgical robots |
@@ -190,6 +190,13 @@ Each prediction has exactly one status:
 **Confidence** (`high`, `medium`, `low`) is your current judgment of whether it will happen by the target year. Update it every run, with a one-line reason in `history` whenever it changes.
 
 **Adding predictions:** you may add new predictions sparked by the news (`origin: "agent"`). Each must be specific and checkable, with a domain, target year, and `kind`. Never edit the wording of an existing prediction. Add a revised one instead.
+
+**Queued for the next run:** add these to the ledger (`origin: "agent"`, `domain: "ai"`, `status: "pending"` unless evidence already supports another status), then delete this list from the spec.
+- 2028 (`deployment`): A frontier lab releases a production model trained with a concept-level objective (for example, Next-Concept Modeling) instead of only next-token prediction
+- 2029 (`capability`): A top-10 model on a major independent leaderboard is mainly non-transformer (for example, a state-space or hybrid architecture)
+- 2030 (`impact`): A Kolmogorov–Arnold Network model is central to a peer-reviewed scientific discovery
+
+Research on alternative architectures is mostly preprints. Treat arXiv results as `secondary` evidence, and never confirm on benchmark claims from the authors alone.
 
 **Scorecard math** (shown on the dashboard): among predictions whose target year has arrived, the hit rate = (confirmed + early) / (confirmed + early + missed). Also show counts per status per domain.
 
